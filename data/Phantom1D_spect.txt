@@ -1,0 +1,4 @@
+T2_min=3;
+T2_max=1000;
+T2_spacing='log';
+T2_num=300;

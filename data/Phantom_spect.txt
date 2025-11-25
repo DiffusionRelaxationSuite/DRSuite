@@ -1,0 +1,9 @@
+D_min=0.01;
+D_max=3;
+D_spacing='log';
+D_num=70;
+T2_min=3;
+T2_max=300;
+T2_spacing='log';
+T2_num=70;
+
