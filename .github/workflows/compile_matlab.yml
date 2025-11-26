@@ -11,7 +11,6 @@ on:
   #   branches: [main]
 env:
   RELEASEVERSION: ${{ github.ref_name }}
-  VERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
 jobs:
   build:
@@ -28,8 +27,23 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set environment variables for linux
+        if: runner.os == 'Linux'
+        run: |
+          echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+          echo "PACKAGE=${PWD}/DRSuite_${RELEASEVERSION}_linux_x64.zip" >> $GITHUB_ENV
+
+      - name: Set environment variables for mac
+        if: runner.os == 'macOS'
+        run: |
+          echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
+          if [ $(uname -m) == "x86_64" ]; then
+            echo "PACKAGE=${PWD}/DRSuite_${RELEASEVERSION}_mac_x64.zip" >> $GITHUB_ENV          
+          else
+            echo "PACKAGE=${PWD}/DRSuite_${RELEASEVERSION}_mac_ARM64.zip" >> $GITHUB_ENV
+          fi
+
       - name: Set up MATLAB
-        # if: runner.environment != 'self-hosted'
         uses: matlab-actions/setup-matlab@v2
         id: setup-matlab
         with:
@@ -40,35 +54,32 @@ jobs:
             Image_Processing_Toolbox
             Medical_Imaging_Toolbox
             Parallel_Computing_Toolbox
-        
-      - name: Set environment variables
-        run: |
-          echo "Package=${PWD}/cli.zip" >> $GITHUB_ENV
-          echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
-
+            
       - name: Compile command-line tools
         uses: matlab-actions/run-command@v2
         with:
-          # startup-options: -sd packaging_tools
           command: "compile_cli"
+
+      - name: make package
+        run: |
+          cd ..
+          zip -r "${PACKAGE}" DRSuite/bin DRSuite/LICENSE.txt DRSuite/readme.md
           
       - name: Save Binaries as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: drsuite_cli-${{ env.SHA_SHORT }}
-          path: bin
+          path: ${{ env.PACKAGE }}
           overwrite: true
 
       - name: Test 1D Workflow (MATLAB)
         uses: matlab-actions/run-command@v2
         with:
-          # startup-options: -sd packaging_tools
           command: "phantom_1d_workflow"
 
       - name: Test 2D Workflow (MATLAB)
         uses: matlab-actions/run-command@v2
         with:
-          # startup-options: -sd packaging_tools
           command: "phantom_2d_workflow"          
           
       - name: Test 1D Workflow (Compiled)
@@ -93,10 +104,10 @@ jobs:
           path: Result
           overwrite: true
         
-      - name: Publish ${{ env.Package }}
+      - name: Publish ${{ env.PACKAGE }}
         if: github.event_name == 'release'
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "${{ env.Package }}"
+          artifacts: "${{ env.PACKAGE }}"
           tag: ${{ env.RELEASEVERSION }}       
           allowUpdates: true
