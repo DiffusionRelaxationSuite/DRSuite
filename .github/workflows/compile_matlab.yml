@@ -11,8 +11,7 @@ on:
   #   branches: [main]
 env:
   RELEASEVERSION: ${{ github.ref_name }}
-  VERSION: 25a2
-  BUILD_NO: "beta"
+  VERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
 jobs:
   build:
@@ -21,8 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [ubuntu-latest, macos-latest]
-        os: [ ubuntu-22.04 ] #, macos-15-intel ]
+        os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
       labels: [ "${{ matrix.os }}" ]
 
@@ -94,7 +92,6 @@ jobs:
           name: Result-${{ env.SHA_SHORT }}
           path: Result
           overwrite: true
-
         
       - name: Publish ${{ env.Package }}
         if: github.event_name == 'release'
