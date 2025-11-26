@@ -62,7 +62,7 @@ jobs:
 
       - name: make package
         run: |
-          ini2struct/license.txt ini2struct_license.txt 
+          cp ini2struct/license.txt ini2struct_license.txt 
           cd ..
           zip -r "${PACKAGE}" DRSuite/bin DRSuite/LICENSE.txt DRSuite/readme.md ini2struct_license.txt
           
