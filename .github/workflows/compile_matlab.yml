@@ -64,7 +64,7 @@ jobs:
         run: |
           cp ini2struct/license.txt ini2struct_license.txt 
           cd ..
-          zip -r "${PACKAGE}" DRSuite/bin DRSuite/LICENSE.txt DRSuite/readme.md ini2struct_license.txt
+          zip -r "${PACKAGE}" DRSuite/bin DRSuite/LICENSE.txt DRSuite/readme.md DRSuite/ini2struct_license.txt
           
       - name: Save Binaries as Artifact
         uses: actions/upload-artifact@v4
