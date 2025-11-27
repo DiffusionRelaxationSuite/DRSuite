@@ -10,7 +10,8 @@ on:
   # pull_request:
   #   branches: [main]
 env:
-  RELEASEVERSION: ${{ github.ref_name }}
+#  RELEASEVERSION: ${{ github.ref_name }}
+  RELEASEVERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
   MATLAB_VERSION: R2025b
 jobs:
@@ -31,21 +32,18 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set environment variables for linux
+      - name: Set package name for linux
         if: runner.os == 'Linux'
-        run: |
-          echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
-          echo "PACKAGE=${PWD}/DRSuite_${RELEASEVERSION}_linux_x64.zip" >> $GITHUB_ENV
+        run: echo "PKGNAME=DRSuite${RELEASEVERSION}_linux_$(uname -m)" >> $GITHUB_ENV 
 
-      - name: Set environment variables for mac
+      - name: Set package name for mac
         if: runner.os == 'macOS'
+        run: echo "PKGNAME=DRSuite${RELEASEVERSION}_mac_$(uname -m)" >> $GITHUB_ENV 
+
+      - name: Set unix variables
         run: |
           echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
-          if [ $(uname -m) == "x86_64" ]; then
-            echo "PACKAGE=${PWD}/DRSuite_${RELEASEVERSION}_mac_x64.zip" >> $GITHUB_ENV          
-          else
-            echo "PACKAGE=${PWD}/DRSuite_${RELEASEVERSION}_mac_ARM64.zip" >> $GITHUB_ENV
-          fi
+          echo "PACKAGE=${PWD}/${PKGNAME}.zip" >> $GITHUB_ENV          
 
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
@@ -62,18 +60,12 @@ jobs:
       - name: Compile command-line tools
         uses: matlab-actions/run-command@v2
         with:
-          command: "compile_cli"
-
-      - name: make package
-        run: |
-          cp ini2struct/license.txt ini2struct_license.txt 
-          cd ..
-          zip -r "${PACKAGE}" ${{ github.event.repository.name }}/{bin,LICENSE.txt,readme.md,ini2struct_license.txt}
+          command: compile_cli("${{ env.RELEASEVERSION }}")
           
       - name: Save Binaries as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: drsuite_cli-${{ env.SHA_SHORT }}
+          name: ${{ env.PKGNAME}}
           path: ${{ env.PACKAGE }}
           overwrite: true
 
@@ -91,7 +83,10 @@ jobs:
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
         run: |
-          PATH="${PWD}/bin:$PATH"
+          mkdir test1D
+          cd test1D
+          unzip ${PACKAGE}
+          PATH="${PKGNAME}/bin:$PATH"
           ./phantom_1d_workflow.sh
 
       # - name: Test 2D Workflow (Compiled)
