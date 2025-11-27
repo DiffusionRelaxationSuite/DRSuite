@@ -28,17 +28,17 @@ function package_drsuite(versno)
         [~,m]=system('uname -m'); m=strtrim(m);
         architecture=['mac_' m];
     elseif ispc
-        architecture='win'
+        architecture='win';
         exec_extension='.exe';
     else % assume linux
         [~,m]=system('uname -m'); m=strtrim(m);
         architecture=['linux_' m];
     end
-    pkgname=sprintf('drsuite_%s_%s',versno,architecture)
+    pkgname=sprintf('drsuite_%s_%s',versno,architecture);
     pkgdir=fullfile('.',pkgname);
     if exist(pkgdir, 'dir'); rmdir(pkgdir,'s'); end
     [~, ~, ~] = mkdir(pkgdir);
-    bindir=fullfile(pkgdir,'/bin')
+    bindir=fullfile(pkgdir,'/bin');
     if exist(bindir, 'dir'); rmdir(bindir,'s'); end
     [~, ~, ~] = mkdir(bindir);
     copyfile('LICENSE.txt',pkgdir)
@@ -59,20 +59,20 @@ function package_drsuite(versno)
     for i=1:length(srcfiles)
         mfile=sprintf("%s.m",srcfiles(i));
         efile=sprintf("%s%s",srcfiles(i),exec_extension);
-        fprintf(1,"compiling %s to %s\n",mfile,efile);
+        fprintf(1,"compiling \33[0;34m%s\33[0;0m to \33[0;33m%s\33[0;0m\n",mfile,efile);
         mcc("-m","-d",builddir,"-a","utilities",...
             "-a","solvers", "-a","ini2struct",...
             sprintf("%s.m",srcfiles(i)))
         if ~ispc
             sfile=sprintf("%s.sh",srcfiles(i));
             dest=fullfile(bindir,sfile);
-            fprintf('updating %s...\n',sfile)
+            fprintf('updating \33[0;35m%s\33[0;0m...\n',sfile)
             writelines(change_runtime_version(fullfile('scripts',sfile)),dest);
             fileattrib(dest, '+x', 'all') 
         end
         movefile(fullfile(builddir,efile),fullfile(bindir,efile))
     end
     zipfile=fullfile(pwd,[pkgname '.zip'])
-    zip(zipfile,pkgdir)
-    fprintf(1,'saved package to \33[0;35m%s\33[0;0m\n',zipfile)
+    zip(zipfile,pkgdir);
+    fprintf(1,'saved package to \33[0;33m%s\33[0;0m\n',zipfile)
 return
