@@ -19,7 +19,7 @@
 function compile_cli(versno)
 % builds cli_plot_composite_maps.m  cli_plot_spectra.m  cli_solver.m
     if (nargin<1)
-        versno='25a';
+        versno='v25a';
     end
     exec_extension='';
     architecture='';
@@ -34,7 +34,7 @@ function compile_cli(versno)
         [~,m]=system('uname -m'); m=strtrim(m);
         architecture=['linux_' m];
     end
-    pkgname=sprintf('drsuite%s_%s',versno,architecture)
+    pkgname=sprintf('drsuite_%s_%s',versno,architecture)
     pkgdir=fullfile('.',pkgname);
     if exist(pkgdir, 'dir'); rmdir(pkgdir,'s'); end
     [~, ~, ~] = mkdir(pkgdir);
@@ -69,5 +69,7 @@ function compile_cli(versno)
         end
         movefile(fullfile(builddir,efile),fullfile(bindir,efile))
     end
-    zip([pkgname '.zip'],pkgdir)                
+    zipfile=fullfile('/home/dws/Github/DRSuiteDev',[pkgname '.zip'])
+    zip(zipfile,pkgdir)
+    fprintf(1,'saved package to %s',zipfile)
 return

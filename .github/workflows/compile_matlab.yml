@@ -34,11 +34,11 @@ jobs:
 
       - name: Set package name for linux
         if: runner.os == 'Linux'
-        run: echo "PKGNAME=DRSuite${RELEASEVERSION}_linux_$(uname -m)" >> $GITHUB_ENV 
+        run: echo "PKGNAME=drsuite${RELEASEVERSION}_linux_$(uname -m)" >> $GITHUB_ENV 
 
       - name: Set package name for mac
         if: runner.os == 'macOS'
-        run: echo "PKGNAME=DRSuite${RELEASEVERSION}_mac_$(uname -m)" >> $GITHUB_ENV 
+        run: echo "PKGNAME=drsuite${RELEASEVERSION}_mac_$(uname -m)" >> $GITHUB_ENV 
 
       - name: Set unix variables
         run: |
