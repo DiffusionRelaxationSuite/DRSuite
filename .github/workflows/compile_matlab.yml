@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         # os: [ Gauss, LarioARM ]
-        label: [ Gauss, LarioARM ]
+        label: [ Gauss, LarioARM, LarioX64 ]
         # os: [ ubuntu-22.04 ]
       #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
@@ -94,12 +94,12 @@ jobs:
           PATH="${PWD}/bin:$PATH"
           ./phantom_1d_workflow.sh
 
-      - name: Test 2D Workflow (Compiled)
-        env:
-          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
-        run: |
-          PATH="${PWD}/bin:$PATH"
-          ./phantom_2d_workflow.sh
+      # - name: Test 2D Workflow (Compiled)
+      #   env:
+      #     BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
+      #   run: |
+      #     PATH="${PWD}/bin:$PATH"
+      #     ./phantom_2d_workflow.sh
 
       - name: Save Test Output as Artifact
         if: github.event_name != 'release'

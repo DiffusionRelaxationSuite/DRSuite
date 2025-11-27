@@ -20,3 +20,4 @@ Phantom*.mat
 profile_*
 bin/*
 bin/*.sh
+*.zip

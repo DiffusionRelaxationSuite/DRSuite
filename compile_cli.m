@@ -20,14 +20,27 @@ function compile_cli()
 % builds cli_plot_composite_maps.m  cli_plot_spectra.m  cli_solver.m
     pkgdir='bin';
     builddir='build';
+    if exist(pkgdir, 'dir')
+        rmdir(pkgdir,'s')
+    end
+    if exist(builddir, 'dir')
+        rmdir(builddir,'s')
+    end
     [~, ~, ~] = mkdir(pkgdir);
     [~, ~, ~] = mkdir(builddir);
     % cd build
     Ext='';
+    Arch='';
     if ismac
         Ext='.app';
+        [~,m]=system('uname -m'); m=strtrim(m);
+        Arch=['mac_' m];
     elseif ispc
-        Ext='.exe'
+        Arch='win'
+        Ext='.exe';
+    else % assume linux
+        [~,m]=system('uname -m'); m=strtrim(m);
+        Arch=['linux_' m];
     end
     srcfiles=[ "plot_avg_spectra", "plot_comp_maps",...
         "plot_spect_im", "plot_beta_sweep", ...
@@ -43,11 +56,11 @@ function compile_cli()
         if ~ispc
             sfile=sprintf("%s.sh",srcfiles(i));
             dest=fullfile(pkgdir,sfile);
-            fprintf('updating %s...',srcfiles(i))
+            fprintf('updating %s...\n',sfile)
             writelines(change_runtime_version(fullfile('scripts',sfile)),dest);
             fileattrib(dest, '+x', 'all') 
         end
         movefile(fullfile(builddir,efile),fullfile(pkgdir,efile))
     end
-    zip('cli.zip','bin')                
+    zip(['drsuite_' Arch '.zip'],'bin')                
 return
