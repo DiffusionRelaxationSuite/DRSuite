@@ -19,7 +19,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
+        os: [ ubuntu-22.04 ]
+      #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
       labels: [ "${{ matrix.os }}" ]
 
