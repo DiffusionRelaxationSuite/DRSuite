@@ -18,27 +18,48 @@
 % Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 function compile_cli()
 % builds cli_plot_composite_maps.m  cli_plot_spectra.m  cli_solver.m
-    [~, ~, ~] = mkdir('bin');
-    [~, ~, ~] = mkdir('build');
-    cd build
+    pkgdir='bin';
+    builddir='build';
+    [~, ~, ~] = mkdir(pkgdir);
+    [~, ~, ~] = mkdir(builddir);
+    % cd build
     Ext='';
     if ismac
         Ext='.app';
+    elseif ispc
+        Ext='.exe'
     end
-    mcc -m -a ../utilities ../plot_avg_spectra.m -o plot_avg_spectra
-    movefile(['plot_avg_spectra' Ext],'../bin')
-    mcc -m -a ../utilities ../plot_comp_maps.m -o plot_comp_maps
-    movefile(['plot_comp_maps' Ext],'../bin')
-    mcc -m -a ../utilities ../plot_spect_im.m -o plot_spect_im
-    movefile(['plot_spect_im' Ext],'../bin')
-    mcc -m -a ../solvers -a ../ini2struct -a ../utilities ../plot_beta_sweep.m -o plot_beta_sweep
-    movefile(['plot_beta_sweep' Ext],'../bin')
-    mcc -m -a ../utilities ../estimate_crlb.m -o estimate_crlb
-    movefile(['estimate_crlb' Ext],'../bin')
-    mcc -m -a ../solvers -a ../ini2struct -a ../utilities ../estimate_spectra.m -o estimate_spectra
-    movefile(['estimate_spectra' Ext],'../bin')
-    mcc -m -a ../utilities ../create_phantom.m -o create_phantom
-    movefile(['create_phantom' Ext],'../bin')
-    cd ..
-    zip('cli.zip','bin')                
+    srcfiles=[ "plot_avg_spectra", "plot_comp_maps",...
+        "plot_spect_im", "plot_beta_sweep", ...
+        "estimate_crlb","estimate_spectra", ...
+          "create_phantom" ];
+    for i=1:length(srcfiles)
+        mfile=sprintf("%s.m",srcfiles(i));
+        efile=sprintf("%s%s",srcfiles(i),Ext);
+        fprintf(1,"compiling %s to %s\n",mfile,efile);
+        mcc("-m","-d",builddir,"-a","utilities",sprintf("%s.m",srcfiles(i)))
+        if ~ispc
+            sfile=sprintf("%s.sh",srcfiles(i));
+            fprintf('updating %s...',srcfiles(i))
+            writelines(change_runtime_version(fullfile('scripts',sfile)),...
+                fullfile(pkgdir,sfile));
+        end
+        movefile(fullfile(builddir,efile),fullfile(pkgdir,efile))
+    end
+    % mcc -m -a ../utilities ../plot_avg_spectra.m -o plot_avg_spectra
+    % movefile(['plot_avg_spectra' Ext],pkgdir)
+    % mcc -m -a ../utilities ../plot_comp_maps.m -o 
+    % movefile(['plot_comp_maps' Ext],pkgdir)
+    % mcc -m -a ../utilities ../plot_spect_im.m -o 
+    % movefile(['plot_spect_im' Ext],pkgdir)
+    % mcc -m -a ../solvers -a ../ini2struct -a ../utilities ../plot_beta_sweep.m -o 
+    % movefile(['plot_beta_sweep' Ext],pkgdir)
+    % mcc -m -a ../utilities ../estimate_crlb.m -o 
+    % movefile(['estimate_crlb' Ext],pkgdir)
+    % mcc -m -a ../solvers -a ../ini2struct -a ../utilities ../estimate_spectra.m -o 
+    % movefile(['estimate_spectra' Ext],pkgdir)
+    % mcc -m -a ../utilities ../create_phantom.m -o 
+    % movefile(['create_phantom' Ext],pkgdir)
+    % cd ..
+    % zip('cli.zip','bin')                
 return

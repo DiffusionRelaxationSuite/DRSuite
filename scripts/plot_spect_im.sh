@@ -4,13 +4,13 @@ export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
 MATLABRelease=R2024b
-MATLABVersion=v242
+MATLABRelease=v242
 MATLABVersNum=24.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
   if [[ "$(uname -m)" == "arm64" ]]; then Arch=maca64; fi
-  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/Applications/MATLAB_${MATLABRelease}.app/
   TestFile=runtime/${Arch}/libmwmclmcrrt.${MATLABVersNum}.dylib
   Executable=${EXEDIR}/${CompiledMATLABProgram}.app/Contents/MacOS/${CompiledMATLABProgram}
@@ -230,7 +230,5 @@ else
   export LD_LIBRARY_PATH;
   export XAPPLRESDIR;
 fi
-
-"${Executable}" "$@"
 
 exit

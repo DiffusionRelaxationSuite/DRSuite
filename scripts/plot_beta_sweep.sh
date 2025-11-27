@@ -4,18 +4,18 @@ export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
 MATLABRelease=R2024b
-MATLABVersion=v242
+MATLABRelease=v242
 MATLABVersNum=24.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
   if [[ "$(uname -m)" == "arm64" ]]; then Arch=maca64; fi
-  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/Applications/MATLAB_${MATLABRelease}.app/
   TestFile=runtime/${Arch}/libmwmclmcrrt.${MATLABVersNum}.dylib
   Executable=${EXEDIR}/${CompiledMATLABProgram}.app/Contents/MacOS/${CompiledMATLABProgram}
 else
-  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/usr/local/MATLAB/${MATLABRelease}
   TestFile=runtime/glnxa64/libmwmclmcrrt.so.${MATLABVersNum}
   Executable=${EXEDIR}/${CompiledMATLABProgram}
@@ -81,20 +81,22 @@ read -d '' usage <<EOF
 ${CompiledMATLABProgram}
 
 Usage:
-  ${Program} -i input_file.mat -o output_file.mat -c config.ini -m mask_file.mat -d dict_file.mat
+  ${Program} -i imgfile -b betafile -m spatialMaskfile -c spectrumInfofile -o output_prefix -t [png|eps|epsc|pdf]
 
 where
-  input_file.mat   input image .mat file, containing data, im_mask, and T1, T2, D
-  output_file.mat  output spectral image file
-  config.ini       configuration file in .ini format
+  imgfile            image file
+  spectmask_file     spectral mask file
+  spectrumInfofile   config (.ini) file
+  output_prefix      prefix to be used for output composite figures
+  png|eps|epsc|pdf   specifies the output type for the figures (can be used multiple times)
 
 Example:
-  spectEstimation.sh -i data/DRCSI_data_format_v1.mat -m data/DRCSI_whole_spatmask.mat -d data/DRCSI_dict.mat -c demos/DRCSI_ladmm.ini -o Result/DRCSI_inj_mouse_data_ladmm_spect.mat'
+
+  ${Program} -i imgfile.mat -b betafile.mat -m spatialMaskfile.mat -c spectrumInfofile.ini -o output_prefix -t png
 
 note: all arguments are required!
 
 EOF
-#  ${Program} -i data/DRCSI_inj_mouse_data.mat -o DRCSI_inj_mouse_data_nnls_spect.mat -c demos/demo2_nnls.ini
 
 # Parse inputs
 if [ $# -lt 1 ]; then
@@ -104,11 +106,12 @@ if [ $# -lt 1 ]; then
   exit
 fi
 
-config_file=""
-input_file=""
-output_file=""
-mask_file=""
-dict_file=""
+imgfile=""
+betafile=""
+spectmask=""
+configfile=""
+output_prefix=""
+output_types=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -120,25 +123,39 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     -i|--imgfile)
-      input_file="$2"
+      imgfile="$2"
       shift; shift;
       ;;
-    -o|--outprefix)
-      output_file="$2"
+    -b|--betafile)
+      betafile="$2"
+      shift; shift;
+      ;;
+    -s|--spect_infofile)
+      spectrum_info_file="$2"
       shift; shift;
       ;;
     -m|--spatmaskfile)
-      mask_file="$2"
-      shift; shift;
-      ;;
-    -d|-s|--spect_infofile)
-      dict_file="$2"
+      spatmaskfile="$2"
       shift; shift;
       ;;
     -c|--configfile)
-      config_file="$2"
+      configfile="$2"
       shift; shift;
       ;;
+    -o|--outprefix)
+      output_prefix="$2"
+      shift; shift;
+      ;;
+    -t|--file_types)
+      shift
+      arg=$1
+      while [[ ! ${arg:0:1} == "-" ]]; do
+        output_types="$output_types $1"
+        shift
+        arg=$1
+        if (($#<1)); then break; fi
+      done
+      ;;      
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -153,45 +170,59 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$input_file" = "x" ]; then
-  errs="${errs}\nNo input file provided -- -i option is required!"
-  ArgsOK=0
-fi
-if [ "x$output_file" = "x" ]; then
-  errs="${errs}\nNo output file provided -- -o option is required!"
-  ArgsOK=0
-fi
-if [ "x$mask_file" = "x" ]; then
-  errs="${errs}\nNo mask file provided -- -m option is required!"
-  ArgsOK=0
-fi
-if [ "x$dict_file" = "x" ]; then
-  errs="${errs}\nNo output file provided -- -o option is required!"
-  ArgsOK=0
-fi
-if [ "x$config_file" = "x" ]; then
-  errs="${errs}\nNo config file provided -- -c option is required!"
+if [ "x$imgfile" = "x" ]; then
+  errs="${errs}\nNo input spectral file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$config_file" ]; then
-    errs="${errs}\nConfig file $config_file does not exist!"
+  if [ ! -f "$imgfile" ]; then
+    errs="${errs}\nInput spectral file $imgfile does not exist!"
     ArgsOK=0
   fi
 fi
-
-if [ ! -f "$input_file" ]; then
-  errs="${errs}\nInput file $input_file does not exist!"
+if [ "x$betafile" = "x" ]; then
+  errs="${errs}\nNo beta file provided -- -b option is required!"
+  ArgsOK=0
+else
+  if [ ! -f "$betafile" ]; then
+    errs="${errs}\nBeta file $betafile does not exist!"
+    ArgsOK=0
+  fi
+fi
+if [ "x$spectmask" = "x" ]; then
+  errs="${errs}\nNo spectral mask file provided -- -m option is required!"
+  ArgsOK=0
+else
+  if [ ! -f "$spectmask" ]; then
+    errs="${errs}\nSpectral mask file $spectmask does not exist!"
+    ArgsOK=0
+  fi
+fi
+if [ "x$configfile" = "x" ]; then
+  errs="${errs}\nNo config file provided -- -c option is required!"
+  ArgsOK=0
+else
+  if [ ! -f "$configfile" ]; then
+    errs="${errs}\nColor file $configfile does not exist!"
+    ArgsOK=0
+  fi
+fi
+if [ "x$output_prefix" = "x" ]; then
+  errs="${errs}\nNo output prefix provided -- -o option is required!"
+  ArgsOK=0
+fi
+if [ "x$output_types" = "x" ]; then
+  errs="${errs}\nNo output image types provided -- -t option is required!"
   ArgsOK=0
 fi
 
+# if (($ArgsOK==0)); then
+#   echo
+#   echo "$usage"
+#   echo
+#   printf "Error:$errs\n\n"
+#   exit 1
+# fi
 
-if (($ArgsOK==0)); then
-  echo
-  echo "$usage"
-  echo
-  printf "Error:$errs\n\n"
-  exit 1
-fi
 
 # Set up path for MCR applications.
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -213,6 +244,11 @@ else
   export XAPPLRESDIR;
 fi
 
-"${Executable}" imgfile $input_file spatmaskfile $mask_file configfile $config_file spect_infofile $dict_file outprefix $output_file
+"${Executable}" imgfile "${imgfile}" \
+    betafile "${betafile}" \
+    spect_infofile "${spectrum_info_file}" \
+    outprefix "${output_prefix}" \
+    configfile "${configfile}" spatmaskfile \
+    "${spatmaskfile}" file_types ${output_types}
 
 exit

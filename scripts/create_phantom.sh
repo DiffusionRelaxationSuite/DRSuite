@@ -4,18 +4,17 @@ export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
 MATLABRelease=R2024b
-MATLABVersion=v242
 MATLABVersNum=24.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
   if [[ "$(uname -m)" == "arm64" ]]; then Arch=maca64; fi
-  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/Applications/MATLAB_${MATLABRelease}.app/
   TestFile=runtime/${Arch}/libmwmclmcrrt.${MATLABVersNum}.dylib
   Executable=${EXEDIR}/${CompiledMATLABProgram}.app/Contents/MacOS/${CompiledMATLABProgram}
 else
-  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/usr/local/MATLAB/${MATLABRelease}
   TestFile=runtime/glnxa64/libmwmclmcrrt.so.${MATLABVersNum}
   Executable=${EXEDIR}/${CompiledMATLABProgram}
@@ -81,21 +80,19 @@ read -d '' usage <<EOF
 ${CompiledMATLABProgram}
 
 Usage:
-  ${Program} -i imgfile -b betafile -m spatialMaskfile -c spectrumInfofile -o output_prefix -t [png|eps|epsc|pdf]
+    ${Program} -i spectral_file.txt -a acquisition_file.mat -o output_folder
 
 where
-  imgfile            image file
-  spectmask_file     spectral mask file
-  spectrumInfofile   config (.ini) file
-  output_prefix      prefix to be used for output composite figures
-  png|eps|epsc|pdf   specifies the output type for the figures (can be used multiple times)
+  spectral_file.txt     
+  acquisition_file.txt
+  output_file           output folder
 
 Example:
+  ${Program} -i data/Phantom_spect.mat -a data/acq_phantom.txt -o Phantom1
 
-  ${Program} -i imgfile.mat -b betafile.mat -m spatialMaskfile.mat -c spectrumInfofile.ini -o output_prefix -t png
 
 note: all arguments are required!
-
+ 
 EOF
 
 # Parse inputs
@@ -106,12 +103,10 @@ if [ $# -lt 1 ]; then
   exit
 fi
 
-imgfile=""
-betafile=""
-spectmask=""
-configfile=""
-output_prefix=""
-output_types=""
+
+spectfile=""
+acqfile=""
+outputdir=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -122,40 +117,22 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       exit 0
       ;;
-    -i|--imgfile)
-      imgfile="$2"
+    -i|--spectfile)
+      spectfile="$2"
       shift; shift;
       ;;
-    -b|--betafile)
-      betafile="$2"
+    -a|--acqfile)
+      acqfile="$2"
       shift; shift;
       ;;
-    -s|--spect_infofile)
-      spectrum_info_file="$2"
+    -o|--outfolder)
+      outputdir="$2"
       shift; shift;
       ;;
-    -m|--spatmaskfile)
-      spatmaskfile="$2"
+    --multislice)
+      options="$options multislice $2"
       shift; shift;
       ;;
-    -c|--configfile)
-      configfile="$2"
-      shift; shift;
-      ;;
-    -o|--outprefix)
-      output_prefix="$2"
-      shift; shift;
-      ;;
-    -t|--file_types)
-      shift
-      arg=$1
-      while [[ ! ${arg:0:1} == "-" ]]; do
-        output_types="$output_types $1"
-        shift
-        arg=$1
-        if (($#<1)); then break; fi
-      done
-      ;;      
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -170,59 +147,36 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$imgfile" = "x" ]; then
+if [ "x$spectfile" = "x" ]; then
   errs="${errs}\nNo input spectral file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$imgfile" ]; then
-    errs="${errs}\nInput spectral file $imgfile does not exist!"
+  if [ ! -f "$spectfile" ]; then
+    errs="${errs}\Input spectral file $spectfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$betafile" = "x" ]; then
-  errs="${errs}\nNo beta file provided -- -b option is required!"
+if [ "x$acqfile" = "x" ]; then
+  errs="${errs}\nNo image file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$betafile" ]; then
-    errs="${errs}\nBeta file $betafile does not exist!"
+  if [ ! -f "$acqfile" ]; then
+    errs="${errs}\nImage file $acqfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$spectmask" = "x" ]; then
-  errs="${errs}\nNo spectral mask file provided -- -m option is required!"
-  ArgsOK=0
-else
-  if [ ! -f "$spectmask" ]; then
-    errs="${errs}\nSpectral mask file $spectmask does not exist!"
-    ArgsOK=0
-  fi
-fi
-if [ "x$configfile" = "x" ]; then
-  errs="${errs}\nNo config file provided -- -c option is required!"
-  ArgsOK=0
-else
-  if [ ! -f "$configfile" ]; then
-    errs="${errs}\nColor file $configfile does not exist!"
-    ArgsOK=0
-  fi
-fi
-if [ "x$output_prefix" = "x" ]; then
+if [ "x$outputdir" = "x" ]; then
   errs="${errs}\nNo output prefix provided -- -o option is required!"
   ArgsOK=0
 fi
-if [ "x$output_types" = "x" ]; then
-  errs="${errs}\nNo output image types provided -- -t option is required!"
-  ArgsOK=0
+
+if (($ArgsOK==0)); then
+  echo
+  echo "$usage"
+  echo
+  printf "Error:$errs\n\n"
+  exit 1
 fi
-
-# if (($ArgsOK==0)); then
-#   echo
-#   echo "$usage"
-#   echo
-#   printf "Error:$errs\n\n"
-#   exit 1
-# fi
-
 
 # Set up path for MCR applications.
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -244,11 +198,6 @@ else
   export XAPPLRESDIR;
 fi
 
-"${Executable}" imgfile "${imgfile}" \
-    betafile "${betafile}" \
-    spect_infofile "${spectrum_info_file}" \
-    outprefix "${output_prefix}" \
-    configfile "${configfile}" spatmaskfile \
-    "${spatmaskfile}" file_types ${output_types}
+"${Executable}" spectfile "${spectfile}" acqfile "${acqfile}" outfolder ${outputdir} ${options}
 
 exit

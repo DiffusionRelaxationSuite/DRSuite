@@ -1,21 +1,27 @@
 #!/bin/bash
+# set -e
+
+# TODO: graphics output flag can only take one argument now
+# if multiple are provided, then it will use the final one.
+# This should be fixed in later versions (10/10/25 - dws)
+
 EXEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)" ;
 export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
 MATLABRelease=R2024b
-MATLABVersion=v242
+MATLABRelease=v242
 MATLABVersNum=24.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
   if [[ "$(uname -m)" == "arm64" ]]; then Arch=maca64; fi
-  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/Applications/MATLAB_${MATLABRelease}.app/
   TestFile=runtime/${Arch}/libmwmclmcrrt.${MATLABVersNum}.dylib
   Executable=${EXEDIR}/${CompiledMATLABProgram}.app/Contents/MacOS/${CompiledMATLABProgram}
 else
-  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/usr/local/MATLAB/${MATLABRelease}
   TestFile=runtime/glnxa64/libmwmclmcrrt.so.${MATLABVersNum}
   Executable=${EXEDIR}/${CompiledMATLABProgram}
@@ -81,15 +87,16 @@ read -d '' usage <<EOF
 ${CompiledMATLABProgram}
 
 Usage:
-    ${Program} -i spectral_file.txt -a acquisition_file.mat -o output_folder
+    ${Program} -i spectral_file.mat -m maskfile.mat -o output_prefix -t figure_types)
 
 where
-  spectral_file.txt     
-  acquisition_file.txt
-  output_file           output folder
+  input_file.mat   input image .mat file, containing data, im_mask, and T1, T2, D
+  output_file.mat  output spectral image file
+  maskfile.mat     mask file
+  figure_types     output figure types (png, epsc, etc)
 
 Example:
-  ${Program} -i data/Phantom_spect.mat -a data/acq_phantom.txt -o Phantom1
+  ${Program} -i DRCSI_inj_mouse_data_nnls_spect.mat -m mask.mat -o Result -t png epsc
 
 
 note: all arguments are required!
@@ -106,8 +113,9 @@ fi
 
 
 spectfile=""
-acqfile=""
-outputdir=""
+imgfile=""
+output_prefix=""
+output_types=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -118,22 +126,29 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       exit 0
       ;;
-    -i|--spectfile)
+    -i|--spect_imfile)
       spectfile="$2"
       shift; shift;
       ;;
-    -a|--acqfile)
-      acqfile="$2"
+    -m|--spatmaskfile)
+      maskfile="$2"
       shift; shift;
       ;;
-    -o|--outfolder)
-      outputdir="$2"
+    -o|--outprefix)
+      output_prefix="$2"
       shift; shift;
       ;;
-    --multislice)
-      options="$options multislice $2"
-      shift; shift;
-      ;;
+    -t|--file_types)
+      shift
+      arg=$1
+      while [[ ! ${arg:0:1} == "-" ]]; do
+        # output_types="$output_types $1"
+        output_types="$1"
+        shift
+        arg=$1
+        if (($#<1)); then break; fi
+      done
+      ;;      
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -157,17 +172,21 @@ else
     ArgsOK=0
   fi
 fi
-if [ "x$acqfile" = "x" ]; then
-  errs="${errs}\nNo image file provided -- -i option is required!"
+if [ "x$maskfile" = "x" ]; then
+  errs="${errs}\nNo mask file provided -- -m option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$acqfile" ]; then
-    errs="${errs}\nImage file $acqfile does not exist!"
+  if [ ! -f "$maskfile" ]; then
+    errs="${errs}\Mask file $maskfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$outputdir" = "x" ]; then
+if [ "x$output_prefix" = "x" ]; then
   errs="${errs}\nNo output prefix provided -- -o option is required!"
+  ArgsOK=0
+fi
+if [ "x$output_types" = "x" ]; then
+  errs="${errs}\nNo output image types provided -- -t option is required!"
   ArgsOK=0
 fi
 
@@ -199,6 +218,11 @@ else
   export XAPPLRESDIR;
 fi
 
-"${Executable}" spectfile "${spectfile}" acqfile "${acqfile}" outfolder ${outputdir} ${options}
+#example:
+#plotAvgSpectra('spect_imfile','Phantom1D/Phantom1D_data_ladmm_spect.mat', 'spatmaskfile', 'Phantom1D/Phantom_mask.mat', ...
+    # 'outprefix','Phantom1D/Phantom1D_data_ladmm_avg_spectra','linewidth',3,'ax_scale',{'log'},'color','g','cbar',1, ...
+    # 'ax_lim',"[10 200]", 'file_types', {'png','pdf'});
+echo Running "${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
+"${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
 
 exit

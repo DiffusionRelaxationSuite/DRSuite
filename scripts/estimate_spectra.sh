@@ -1,27 +1,21 @@
 #!/bin/bash
-# set -e
-
-# TODO: graphics output flag can only take one argument now
-# if multiple are provided, then it will use the final one.
-# This should be fixed in later versions (10/10/25 - dws)
-
 EXEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)" ;
 export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
 MATLABRelease=R2024b
-MATLABVersion=v242
+MATLABRelease=v242
 MATLABVersNum=24.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
   if [[ "$(uname -m)" == "arm64" ]]; then Arch=maca64; fi
-  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/Applications/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/Applications/MATLAB_${MATLABRelease}.app/
   TestFile=runtime/${Arch}/libmwmclmcrrt.${MATLABVersNum}.dylib
   Executable=${EXEDIR}/${CompiledMATLABProgram}.app/Contents/MacOS/${CompiledMATLABProgram}
 else
-  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/usr/local/MATLAB/${MATLABRelease}
   TestFile=runtime/glnxa64/libmwmclmcrrt.so.${MATLABVersNum}
   Executable=${EXEDIR}/${CompiledMATLABProgram}
@@ -87,21 +81,20 @@ read -d '' usage <<EOF
 ${CompiledMATLABProgram}
 
 Usage:
-    ${Program} -i spectral_file.mat -m maskfile.mat -o output_prefix -t figure_types)
+  ${Program} -i input_file.mat -o output_file.mat -c config.ini -m mask_file.mat -d dict_file.mat
 
 where
   input_file.mat   input image .mat file, containing data, im_mask, and T1, T2, D
   output_file.mat  output spectral image file
-  maskfile.mat     mask file
-  figure_types     output figure types (png, epsc, etc)
+  config.ini       configuration file in .ini format
 
 Example:
-  ${Program} -i DRCSI_inj_mouse_data_nnls_spect.mat -m mask.mat -o Result -t png epsc
-
+  spectEstimation.sh -i data/DRCSI_data_format_v1.mat -m data/DRCSI_whole_spatmask.mat -d data/DRCSI_dict.mat -c demos/DRCSI_ladmm.ini -o Result/DRCSI_inj_mouse_data_ladmm_spect.mat'
 
 note: all arguments are required!
- 
+
 EOF
+#  ${Program} -i data/DRCSI_inj_mouse_data.mat -o DRCSI_inj_mouse_data_nnls_spect.mat -c demos/demo2_nnls.ini
 
 # Parse inputs
 if [ $# -lt 1 ]; then
@@ -111,11 +104,11 @@ if [ $# -lt 1 ]; then
   exit
 fi
 
-
-spectfile=""
-imgfile=""
-output_prefix=""
-output_types=""
+config_file=""
+input_file=""
+output_file=""
+mask_file=""
+dict_file=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -126,29 +119,26 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       exit 0
       ;;
-    -i|--spect_imfile)
-      spectfile="$2"
-      shift; shift;
-      ;;
-    -m|--spatmaskfile)
-      maskfile="$2"
+    -i|--imgfile)
+      input_file="$2"
       shift; shift;
       ;;
     -o|--outprefix)
-      output_prefix="$2"
+      output_file="$2"
       shift; shift;
       ;;
-    -t|--file_types)
-      shift
-      arg=$1
-      while [[ ! ${arg:0:1} == "-" ]]; do
-        # output_types="$output_types $1"
-        output_types="$1"
-        shift
-        arg=$1
-        if (($#<1)); then break; fi
-      done
-      ;;      
+    -m|--spatmaskfile)
+      mask_file="$2"
+      shift; shift;
+      ;;
+    -d|-s|--spect_infofile)
+      dict_file="$2"
+      shift; shift;
+      ;;
+    -c|--configfile)
+      config_file="$2"
+      shift; shift;
+      ;;
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -163,32 +153,37 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$spectfile" = "x" ]; then
-  errs="${errs}\nNo input spectral file provided -- -i option is required!"
+if [ "x$input_file" = "x" ]; then
+  errs="${errs}\nNo input file provided -- -i option is required!"
   ArgsOK=0
-else
-  if [ ! -f "$spectfile" ]; then
-    errs="${errs}\Input spectral file $spectfile does not exist!"
-    ArgsOK=0
-  fi
 fi
-if [ "x$maskfile" = "x" ]; then
+if [ "x$output_file" = "x" ]; then
+  errs="${errs}\nNo output file provided -- -o option is required!"
+  ArgsOK=0
+fi
+if [ "x$mask_file" = "x" ]; then
   errs="${errs}\nNo mask file provided -- -m option is required!"
   ArgsOK=0
+fi
+if [ "x$dict_file" = "x" ]; then
+  errs="${errs}\nNo output file provided -- -o option is required!"
+  ArgsOK=0
+fi
+if [ "x$config_file" = "x" ]; then
+  errs="${errs}\nNo config file provided -- -c option is required!"
+  ArgsOK=0
 else
-  if [ ! -f "$maskfile" ]; then
-    errs="${errs}\Mask file $maskfile does not exist!"
+  if [ ! -f "$config_file" ]; then
+    errs="${errs}\nConfig file $config_file does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$output_prefix" = "x" ]; then
-  errs="${errs}\nNo output prefix provided -- -o option is required!"
+
+if [ ! -f "$input_file" ]; then
+  errs="${errs}\nInput file $input_file does not exist!"
   ArgsOK=0
 fi
-if [ "x$output_types" = "x" ]; then
-  errs="${errs}\nNo output image types provided -- -t option is required!"
-  ArgsOK=0
-fi
+
 
 if (($ArgsOK==0)); then
   echo
@@ -218,11 +213,6 @@ else
   export XAPPLRESDIR;
 fi
 
-#example:
-#plotAvgSpectra('spect_imfile','Phantom1D/Phantom1D_data_ladmm_spect.mat', 'spatmaskfile', 'Phantom1D/Phantom_mask.mat', ...
-    # 'outprefix','Phantom1D/Phantom1D_data_ladmm_avg_spectra','linewidth',3,'ax_scale',{'log'},'color','g','cbar',1, ...
-    # 'ax_lim',"[10 200]", 'file_types', {'png','pdf'});
-echo Running "${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
-"${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
+"${Executable}" imgfile $input_file spatmaskfile $mask_file configfile $config_file spect_infofile $dict_file outprefix $output_file
 
 exit
