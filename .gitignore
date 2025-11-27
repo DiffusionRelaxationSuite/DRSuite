@@ -11,6 +11,7 @@ bin/*.sh
 drsuite*/LICENSE.txt
 drsuite*/readme.md
 drsuite*/ini2struct_license.txt
+drsuite*/*
 
 
 

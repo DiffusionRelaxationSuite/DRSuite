@@ -8,16 +8,12 @@ for i=1:length(lines)
     [token,remain] = strtok(strtrim(lines(i)), '=');
     token=strtrim(token);
     if (token=="MATLABRelease")
-        fprintf(1,"-%s\n",lines(i));
+        fprintf(1,"\33[0;31m-%s\n",lines(i));
         lines(i)=sprintf("MATLABRelease=%s",release);
-        fprintf(1,"+%s\n",lines(i));
+        fprintf(1,"\33[0;32m+%s\33[0;0m\n",lines(i));
     elseif (token=="MATLABVersNum")
-        fprintf(1,"-%s\n",lines(i));
+        fprintf(1,"\33[0;31m-%s\33[0;0m\n",lines(i));
         lines(i)=sprintf("MATLABVersNum=%s",versnum);
-        fprintf(1,"+%s\n",lines(i));
+        fprintf(1,"\33[0;32m+%s\33[0;0m\n",lines(i));
     end
-% elseif (token=="MATLABVersion")
-%     fprintf(2,"-%s\n",lines(i));
-%     lines(i)=sprintf("MATLABVersion=%s",vers);
-%     fprintf(1,"+%s\n",lines(i));
 end
