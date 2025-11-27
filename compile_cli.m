@@ -18,8 +18,8 @@
 % Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 function compile_cli()
 % builds cli_plot_composite_maps.m  cli_plot_spectra.m  cli_solver.m
-    pkgdir='bin';
-    builddir='build';
+    pkgdir='./bin';
+    builddir='./build';
     if exist(pkgdir, 'dir')
         rmdir(pkgdir,'s')
     end
