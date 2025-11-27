@@ -2,9 +2,6 @@ Result
 Result*
 build
 package
-bin/plot_composite_maps
-bin/plot_avg_spectra
-bin/solver
 cli.zip
 admm_ldmm.zip
 admm_ladmmdocker
@@ -21,3 +18,5 @@ solver
 spectEstimation
 Phantom*.mat
 profile_*
+bin/*
+bin/*.sh
