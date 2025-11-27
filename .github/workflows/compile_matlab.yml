@@ -57,10 +57,10 @@ jobs:
             Medical_Imaging_Toolbox
             Parallel_Computing_Toolbox
             
-      - name: Compile command-line tools
+      - name: Compile and package command-line tools
         uses: matlab-actions/run-command@v2
         with:
-          command: compile_cli("${{ env.RELEASEVERSION }}")
+          command: package_drsuite("${{ env.RELEASEVERSION }}")
           
       - name: Save Binaries as Artifact
         uses: actions/upload-artifact@v4
@@ -85,10 +85,9 @@ jobs:
         run: |
           mkdir test1D
           cd test1D
-          unzip ${PACKAGE}
+          unzip -q ${PACKAGE}
           cd ${PKGNAME}
           PATH="${PWD}/bin:$PATH"
-          ls
           ./phantom_1d_workflow.sh
 
       # - name: Test 2D Workflow (Compiled)

@@ -11,7 +11,7 @@ create_phantom.sh -a data/acq_phantom1D.txt -i data/Phantom1D_spect.txt -o Phant
 # spectrum Estimation --ladmm
 estimate_spectra.sh -i Phantom1D/Phantom_data.mat -m Phantom1D/Phantom_mask.mat \
     -d Phantom1D/Phantom_spectrm_info.mat -c demos/Phantom1D_ladmm.ini -o Result/Phantom1D_ladmm_spect.mat
-    
+
 # spectrum Estimation --admm
 # spectEstimation Phantom1D/Phantom_data.mat Phantom1D/Phantom_mask.mat \
 #     Phantom1D/Phantom_spectrm_info.mat demos/Phantom_admm.ini Result/Phantom1D_admm_spect.mat)
