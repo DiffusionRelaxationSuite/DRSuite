@@ -176,4 +176,7 @@ end
 save(outprefix,"spectral_image","axes","spectral_dim","spatial_dim","resolution","transform",'-v7.3')
 fprintf(1,'Saved result to %s\n',outprefix)
 fprintf(1,'Total program time: %f seconds\n',toc(programTimer))
+if (ismcc || isdeployed)
+    close all
+end
 return
