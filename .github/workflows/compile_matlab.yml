@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ linux ]
+        os: [ linux, macos ]
         # os: [ ubuntu-22.04 ]
       #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
@@ -75,15 +75,15 @@ jobs:
           path: ${{ env.PACKAGE }}
           overwrite: true
 
-      - name: Test 1D Workflow (MATLAB)
-        uses: matlab-actions/run-command@v2
-        with:
-          command: "phantom_1d_workflow"
+      # - name: Test 1D Workflow (MATLAB)
+      #   uses: matlab-actions/run-command@v2
+      #   with:
+      #     command: "phantom_1d_workflow"
 
-      - name: Test 2D Workflow (MATLAB)
-        uses: matlab-actions/run-command@v2
-        with:
-          command: "phantom_2d_workflow"          
+      # - name: Test 2D Workflow (MATLAB)
+      #   uses: matlab-actions/run-command@v2
+      #   with:
+      #     command: "phantom_2d_workflow"          
           
       - name: Test 1D Workflow (Compiled)
         env:
@@ -92,7 +92,7 @@ jobs:
           PATH="${PWD}/bin:$PATH"
           ./phantom_1d_workflow.sh
 
-      - name: Test 2D Workflow
+      - name: Test 2D Workflow (Compiled)
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
         run: |
