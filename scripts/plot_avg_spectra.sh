@@ -70,7 +70,7 @@ if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
   echo "Please install the Matlab MCR ${MATLABRelease} (${MATLABVersNum}) from MathWorks at:"
   echo "     https://www.mathworks.com/products/compiler/matlab-runtime.html"
   echo 
-  echo "If you already have MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease}ABRelease} with Matlab Compiler]"
+  echo "If you already have MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler]"
   echo "installed, please edit ${Program} by uncommenting and editing"
   echo "the following line near the top of the file:"
   echo

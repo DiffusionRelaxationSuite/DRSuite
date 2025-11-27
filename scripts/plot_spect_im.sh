@@ -14,7 +14,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   TestFile=runtime/${Arch}/libmwmclmcrrt.${MATLABVersNum}.dylib
   Executable=${EXEDIR}/${CompiledMATLABProgram}.app/Contents/MacOS/${CompiledMATLABProgram}
 else
-  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABVersion}
+  DefaultRuntimePath=/usr/local/MATLAB/MATLAB_Runtime/${MATLABRelease}
   DefaultInstallPath=/usr/local/MATLAB/${MATLABRelease}
   TestFile=runtime/glnxa64/libmwmclmcrrt.so.${MATLABVersNum}
   Executable=${EXEDIR}/${CompiledMATLABProgram}
@@ -64,7 +64,7 @@ if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
   echo "Please install the Matlab MCR ${MATLABRelease} (${MATLABVersNum}) from MathWorks at:"
   echo "     https://www.mathworks.com/products/compiler/matlab-runtime.html"
   echo 
-  echo "If you already have MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease}ABRelease} with Matlab Compiler]"
+  echo "If you already have MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler]"
   echo "installed, please edit ${Program} by uncommenting and editing"
   echo "the following line near the top of the file:"
   echo

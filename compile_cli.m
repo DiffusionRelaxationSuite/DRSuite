@@ -46,8 +46,8 @@ function compile_cli(versno)
     copyfile('ini2struct/license.txt',fullfile(pkgdir,'ini2struct_license.txt'))
     copyfile('phantom_1d_workflow.sh',pkgdir)
     copyfile('phantom_2d_workflow.sh',pkgdir)
-    copyfile('data',pkgdir)
-    copyfile('demos',pkgdir)
+    copyfile('data',fullfile(pkgdir,'data'))
+    copyfile('demos',fullfile(pkgdir,'demos'))
     builddir='./build';
     if exist(builddir, 'dir'); rmdir(builddir,'s'); end
     [~, ~, ~] = mkdir(builddir);
@@ -74,5 +74,5 @@ function compile_cli(versno)
     end
     zipfile=fullfile(pwd,[pkgname '.zip'])
     zip(zipfile,pkgdir)
-    fprintf(1,'\33[0;35msaved package to %s\33[0;0m\n',zipfile)
+    fprintf(1,'saved package to \33[0;35m%s\33[0;0m\n',zipfile)
 return
