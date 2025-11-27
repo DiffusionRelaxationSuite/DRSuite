@@ -7,3 +7,12 @@ profile_*
 bin/*
 bin/*.sh
 *.zip
+*/bin
+drsuite*/LICENSE.txt
+drsuite*/readme.md
+drsuite*/ini2struct_license.txt
+
+
+
+
+
