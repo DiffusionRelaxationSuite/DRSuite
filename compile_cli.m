@@ -69,7 +69,7 @@ function compile_cli(versno)
         end
         movefile(fullfile(builddir,efile),fullfile(bindir,efile))
     end
-    zipfile=fullfile('/home/dws/Github/DRSuiteDev',[pkgname '.zip'])
+    zipfile=fullfile(pwd,[pkgname '.zip'])
     zip(zipfile,pkgdir)
     fprintf(1,'saved package to %s',zipfile)
 return
