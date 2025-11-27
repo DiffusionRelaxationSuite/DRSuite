@@ -44,6 +44,8 @@ function compile_cli(versno)
     copyfile('LICENSE.txt',pkgdir)
     copyfile('readme.md',pkgdir);
     copyfile('ini2struct/license.txt',fullfile(pkgdir,'ini2struct_license.txt'))
+    copyfile('phantom_1d_workflow.sh',pkgdir)
+    copyfile('phantom_2d_workflow.sh',pkgdir)
 
     builddir='./build';
     if exist(builddir, 'dir'); rmdir(builddir,'s'); end
