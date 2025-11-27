@@ -52,7 +52,7 @@ jobs:
         id: setup-matlab
         with:
           cache: false
-          release: R2024b
+          release: ${{ env.MATLAB_VERSION }}
           products: >
             MATLAB_Compiler
             Image_Processing_Toolbox
