@@ -13,7 +13,7 @@ env:
 #  RELEASEVERSION: ${{ github.ref_name }}
   RELEASEVERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
-  MATLAB_VERSION: R2024b
+  MATLAB_VERSION: R2025a
 jobs:
   build:
     permissions: write-all
