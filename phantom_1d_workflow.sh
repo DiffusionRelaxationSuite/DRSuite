@@ -2,7 +2,7 @@
 RootDir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
 PATH="$RootDir/bin:$PATH"
 
-set -e
+set -ex
 # create phantom with 2D spectral encoding
 # Phantom generation
 install -d Result
