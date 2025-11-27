@@ -37,7 +37,9 @@ function compile_cli()
         mfile=sprintf("%s.m",srcfiles(i));
         efile=sprintf("%s%s",srcfiles(i),Ext);
         fprintf(1,"compiling %s to %s\n",mfile,efile);
-        mcc("-m","-d",builddir,"-a","utilities",sprintf("%s.m",srcfiles(i)))
+        mcc("-m","-d",builddir,"-a","utilities",...
+            "-a","solvers", "-a","ini2struct",...
+            sprintf("%s.m",srcfiles(i)))
         if ~ispc
             sfile=sprintf("%s.sh",srcfiles(i));
             dest=fullfile(pkgdir,sfile);
