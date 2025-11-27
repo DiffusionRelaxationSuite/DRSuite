@@ -86,7 +86,8 @@ jobs:
           mkdir test1D
           cd test1D
           unzip ${PACKAGE}
-          PATH="${PKGNAME}/bin:$PATH"
+          cd ${PKGNAME}
+          PATH="${PWD}/bin:$PATH"
           ./phantom_1d_workflow.sh
 
       # - name: Test 2D Workflow (Compiled)
