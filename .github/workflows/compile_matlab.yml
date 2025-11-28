@@ -6,7 +6,7 @@ on:
   release:
     types: [created]
   push:
-    branches: [windows] #main, dev]
+    branches: [main,dev]
   # pull_request:
   #   branches: [main]
 env:
@@ -20,12 +20,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [ Gauss, LarioARM ]
-        # label: [ Gauss, LarioARM, LarioX64 ]
-        os: [ ubuntu-22.04, macos-15, windows-latest ]
-      #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
+        MATLAB_VERSION: [ R2025b ]
+        # MATLAB_VERSION: [ R2023b , R2024a, R2024b, R2025a, R2025b ]
+        # os: [ windows-latest, ubuntu-22.04, macos-15, macos-15-intel ]
+        os: [ windows-latest, ubuntu-22.04, macos-15 ]
+          
     runs-on:
-      labels: [ "${{ matrix.label }}" ]
+      labels: [ "${{ matrix.os }}" ]
 
     steps:
       - name: Check resources
@@ -90,8 +91,6 @@ jobs:
           path: ${{ env.PACKAGE }}
           overwrite: true
 
-          
-
       # - name: Test 1D Workflow (MATLAB)
       #   uses: matlab-actions/run-command@v2
       #   with:
@@ -131,13 +130,6 @@ jobs:
         run: |
           ./phantom_1d_workflow.bat
 
-      - name: Test 2D Workflow (Compiled)
-        if: runner.os != 'Windows'
-        env:
-          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
-        working-directory: test2D/${{ env.PKGNAME}}
-        run: ./phantom_2d_workflow.sh
-
       - name: Save Test Output as Artifact
         if: github.event_name != 'release'
         uses: actions/upload-artifact@v4
@@ -147,26 +139,18 @@ jobs:
           overwrite: true
 
       - name: Test 2D Workflow (Compiled)
+        if: runner.os != 'Windows'
+        env:
+          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
+        working-directory: test2D/${{ env.PKGNAME}}
+        run: ./phantom_2d_workflow.sh
+
+      - name: Test 2D Workflow (Compiled)
         if: runner.os == 'Windows'
         working-directory: test2D/${{ env.PKGNAME}}
         run: |
-          ./phantom_2d_workflow.bat          
-      # - name: Save Test Output as Artifact
-      #   if: github.event_name != 'release'
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: Result1D-${{ env.SHA_SHORT }}
-      #     path: test1D/${{ env.PKGNAME}}/Result
-      #     overwrite: true
+          ./phantom_2d_workflow.bat
 
-      # - name: Test 2D Workflow (Compiled)
-      #   env:
-      #     BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
-      #   run: |
-      #     PATH="${PWD}/bin:$PATH"
-      #     ./phantom_2d_workflow.sh
-
-        
       - name: Publish ${{ env.PACKAGE }}
         if: github.event_name == 'release'
         uses: ncipollo/release-action@v1
