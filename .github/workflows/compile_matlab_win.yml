@@ -6,7 +6,7 @@ on:
   release:
     types: [created]
   push:
-    branches: [main]
+    branches: [main,dev]
   # pull_request:
   #   branches: [main]
 env:
@@ -20,9 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         # os: [ubuntu-latest, macos-latest]
-        os: [ windows-latest ]
+        os: [ windows ]
     runs-on:
-      labels: [ "${{ matrix.os }}" ]
+      labels: [ self-hosted, "${{ matrix.os }}" ]
 
     steps:
       - name: Check out repository
@@ -77,8 +77,9 @@ jobs:
         run: |
           mkdir test1D
           cd test1D
-          7z x ${PACKAGE}
-          cd ${PKGNAME}
+          # 7z x ${env:PACKAGE}
+          Expand-Archive -Path "${env:PACKAGE}" -DestinationPath "${PWD}"
+          cd ${env:PKGNAME}
           ./phantom_2d_workflow.bat
       # - name: Test 2D Workflow
       #   run: |
