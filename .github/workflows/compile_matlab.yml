@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
   release:
     types: [created]
-  # push:
-    # branches: [main, dev]
+  push:
+    branches: [windows] #main, dev]
   # pull_request:
   #   branches: [main]
 env:
@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         # os: [ Gauss, LarioARM ]
-        label: [ Gauss, LarioARM, LarioX64 ]
+        label: [ Gauss, LarioARM ] #, LarioX64 ]
         # os: [ ubuntu-22.04 ]
       #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
@@ -41,9 +41,16 @@ jobs:
         run: echo "PKGNAME=drsuite_${RELEASEVERSION}_mac_$(uname -m)" >> $GITHUB_ENV 
 
       - name: Set unix variables
+        if: runner.os != 'Windows'
         run: |
           echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
           echo "PACKAGE=${PWD}/${PKGNAME}.zip" >> $GITHUB_ENV          
+
+      - name: Set environment variables for Windows
+        if: runner.os == 'Windows'
+        run: |
+          echo "SHA_SHORT=$(git rev-parse --short "$env:GITHUB_SHA")" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PACKAGE=${PWD}/DRSuite_${env:VERSION}_win_x64.zip" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
@@ -78,17 +85,36 @@ jobs:
       #   uses: matlab-actions/run-command@v2
       #   with:
       #     command: "phantom_2d_workflow"          
-          
+
+      - name: Setup for tests
+        if: runner.os == 'Windows'
+        run: |
+          mkdir test1D
+          mkdir test2D
+          Expand-Archive -Path "${env:PACKAGE}" -DestinationPath "${PWD}/test1D"
+          Expand-Archive -Path "${env:PACKAGE}" -DestinationPath "${PWD}/test2D"
+
+      - name: Setup for tests
+        if: runner.os != 'Windows'
+        run: |
+          install -d test1D
+          install -d test2D
+          unzip -q ${PACKAGE} -d test1D
+          unzip -q ${PACKAGE} -d test1D
+
       - name: Test 1D Workflow (Compiled)
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
-        run: |
-          mkdir test1D
-          cd test1D
-          unzip -q ${PACKAGE}
-          cd ${PKGNAME}
-          PATH="${PWD}/bin:$PATH"
-          ./phantom_1d_workflow.sh
+        working-directory: test1D/${PKGNAME}
+        run: ./phantom_1d_workflow.sh
+
+      - name: Save Test Output as Artifact
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Result1D-${{ env.SHA_SHORT }}
+          path: test1D/${PKGNAME}/Result
+          overwrite: true
 
       # - name: Test 2D Workflow (Compiled)
       #   env:
@@ -97,13 +123,6 @@ jobs:
       #     PATH="${PWD}/bin:$PATH"
       #     ./phantom_2d_workflow.sh
 
-      - name: Save Test Output as Artifact
-        if: github.event_name != 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Result-${{ env.SHA_SHORT }}
-          path: Result
-          overwrite: true
         
       - name: Publish ${{ env.PACKAGE }}
         if: github.event_name == 'release'
