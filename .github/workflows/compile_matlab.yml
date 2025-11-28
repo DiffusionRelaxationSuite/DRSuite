@@ -58,7 +58,7 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         id: setup-matlab
         with:
-          cache: false
+          cache: true
           release: ${{ env.MATLAB_VERSION }}
           products: >
             MATLAB_Compiler
