@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
   release:
     types: [created]
-  push:
-    branches: [main, dev]
+  # push:
+    # branches: [main, dev]
   # pull_request:
   #   branches: [main]
 env:
