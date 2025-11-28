@@ -6,7 +6,7 @@ on:
   release:
     types: [created]
   push:
-    branches: [main,dev]
+    branches: [windows]
   # pull_request:
   #   branches: [main]
 env:
