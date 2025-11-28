@@ -13,7 +13,6 @@ env:
 #  RELEASEVERSION: ${{ github.ref_name }}
   RELEASEVERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
-  # MATLAB_VERSION: R2024b
 jobs:
   build:
     permissions: write-all
@@ -22,8 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         MATLAB_VERSION: [ R2023b ]
-        #, R2024a, R2024b, R2025a, R2025b ]
-        os: [ windows-latest ] #[ ubuntu-22.04, macos-15, macos-15-intel, 
+        # MATLAB_VERSION: [ R2023b , R2024a, R2024b, R2025a, R2025b ]
+        # os: [ windows-latest ] 
+        os: [ windows-latest, ubuntu-22.04, macos-15, macos-15-intel ]
           
     runs-on:
       labels: [ "${{ matrix.os }}" ]
@@ -114,13 +114,30 @@ jobs:
 
       - name: Test 1D Workflow (Compiled)
         if: runner.os == 'Windows'
-        env:
-          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
         working-directory: test1D/${{ env.PKGNAME}}
         run: |
-          dir
           ./phantom_1d_workflow.bat
 
+      - name: Test 2D Workflow (Compiled)
+        if: runner.os != 'Windows'
+        env:
+          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
+        working-directory: test2D/${{ env.PKGNAME}}
+        run: ./phantom_2d_workflow.sh
+
+      - name: Save Test Output as Artifact
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result1D.compiled.{{ env.SHA_SHORT }}
+          path: test1D/${{ env.PKGNAME}}/Result
+          overwrite: true
+
+      - name: Test 2D Workflow (Compiled)
+        if: runner.os == 'Windows'
+        working-directory: test2D/${{ env.PKGNAME}}
+        run: |
+          ./phantom_2d_workflow.bat          
       # - name: Save Test Output as Artifact
       #   if: github.event_name != 'release'
       #   uses: actions/upload-artifact@v4
