@@ -44,7 +44,7 @@ function package_drsuite(versno)
     copyfile('LICENSE.txt',pkgdir)
     copyfile('readme.md',pkgdir);
     copyfile('ini2struct/license.txt',fullfile(pkgdir,'ini2struct_license.txt'))
-    if iswin
+    if ispc
         copyfile('phantom_1d_workflow.bat',pkgdir)
         copyfile('phantom_2d_workflow.bat',pkgdir)
     else
