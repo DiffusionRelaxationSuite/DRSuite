@@ -22,11 +22,11 @@ jobs:
       fail-fast: false
       matrix:
         # os: [ Gauss, LarioARM ]
-        label: [ Gauss, LarioARM, LarioX64 ]
-        # os: [ ubuntu-22.04 ]
+        # label: [ Gauss, LarioARM, LarioX64 ]
+        os: [ ubuntu-22.04, macos-15, windows-latest ]
       #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
-      labels: [ 'self-hosted', "${{ matrix.label }}" ]
+      labels: [ "${{ matrix.label }}" ]
 
     steps:
       - name: Check out repository
