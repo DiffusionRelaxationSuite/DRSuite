@@ -50,7 +50,8 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           echo "SHA_SHORT=$(git rev-parse --short "$env:GITHUB_SHA")" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "PACKAGE=${PWD}/DRSuite_${env:VERSION}_win_x64.zip" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PKGNAME=drsuite_${env:RELEASEVERSION}_win_x64" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PACKAGE=${PWD}/DRSuite_${env:RELEASEVERSION}_win_x64.zip" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2

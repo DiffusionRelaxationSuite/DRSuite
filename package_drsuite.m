@@ -28,7 +28,7 @@ function package_drsuite(versno)
         [~,m]=system('uname -m'); m=strtrim(m);
         architecture=['mac_' m];
     elseif ispc
-        architecture='win';
+        architecture='win_x64';
         exec_extension='.exe';
     else % assume linux
         [~,m]=system('uname -m'); m=strtrim(m);
