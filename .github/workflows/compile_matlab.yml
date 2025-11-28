@@ -21,10 +21,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ Egret ]
-        # os: [ Gauss, LarioARM ]
+        # os: [ Egret ]
+        matlab: [ R2023b, R2024a, R2024b, R2025a, R2025b ]
         # label: [ Gauss, LarioARM ] #, LarioX64 ]
-        # os: [ ubuntu-22.04, macos-15, windows-latest ]
+        os: [ ubuntu-22.04, macos-15, windows-latest ]
       #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
       labels: [ "${{ matrix.os }}" ]
@@ -74,7 +74,7 @@ jobs:
       - name: Save Binaries as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PKGNAME}}
+          name: ${{ env.PKGNAME}}.${{ matrix.matlab }}
           path: ${{ env.PACKAGE }}
           overwrite: true
 
@@ -110,13 +110,13 @@ jobs:
         working-directory: test1D/${{ env.PKGNAME}}
         run: ./phantom_1d_workflow.sh
 
-      - name: Save Test Output as Artifact
-        if: github.event_name != 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Result1D-${{ env.SHA_SHORT }}
-          path: test1D/${{ env.PKGNAME}}/Result
-          overwrite: true
+      # - name: Save Test Output as Artifact
+      #   if: github.event_name != 'release'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Result1D-${{ env.SHA_SHORT }}
+      #     path: test1D/${{ env.PKGNAME}}/Result
+      #     overwrite: true
 
       # - name: Test 2D Workflow (Compiled)
       #   env:
