@@ -77,7 +77,7 @@ jobs:
         run: |
           mkdir test1D
           cd test1D
-          7z x ${env:PKGNAME}
+          7z x ${env:PACKAGE}
           cd ${env:PKGNAME}
           ./phantom_2d_workflow.bat
       # - name: Test 2D Workflow
