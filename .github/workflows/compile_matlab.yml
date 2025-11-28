@@ -40,8 +40,8 @@ jobs:
       - name: Check resources
         if: runner.os == 'Windows'
         run: |
-          (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors.
-          (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory (output is in bytes). 
+          (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+          (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory
 
       - name: Check out repository
         uses: actions/checkout@v4
