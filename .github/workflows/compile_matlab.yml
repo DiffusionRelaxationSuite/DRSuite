@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        MATLAB_VERSION: [ R2023b ]
+        MATLAB_VERSION: [ R2025b ]
         # MATLAB_VERSION: [ R2023b , R2024a, R2024b, R2025a, R2025b ]
         # os: [ windows-latest ] 
         os: [ windows-latest, ubuntu-22.04, macos-15, macos-15-intel ]
@@ -29,6 +29,20 @@ jobs:
       labels: [ "${{ matrix.os }}" ]
 
     steps:
+      - name: Check resources
+        if: runner.os == 'Linux'
+        run: printf "$(nproc) processors, $(free --giga -h|awk '/Mem:/{ print $2 }')B\n"
+
+      - name: Check resources
+        if: runner.os == 'macOS'
+        run: printf "$(sysctl -n hw.ncpu) processors, $(top -l 1 | grep PhysMem)\n"
+
+      - name: Check resources
+        if: runner.os == 'Windows'
+        run: |
+          (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors.
+          (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory (output is in bytes). 
+
       - name: Check out repository
         uses: actions/checkout@v4
 
@@ -129,7 +143,7 @@ jobs:
         if: github.event_name != 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result1D.compiled.{{ env.SHA_SHORT }}
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result1D.compiled.${{ env.SHA_SHORT }}
           path: test1D/${{ env.PKGNAME}}/Result
           overwrite: true
 
