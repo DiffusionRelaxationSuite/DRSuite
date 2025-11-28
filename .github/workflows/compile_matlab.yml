@@ -100,7 +100,7 @@ jobs:
           install -d test1D
           install -d test2D
           unzip -q ${PACKAGE} -d test1D
-          unzip -q ${PACKAGE} -d test1D
+          unzip -q ${PACKAGE} -d test2D
 
       - name: Test 1D Workflow (Compiled)
         env:
