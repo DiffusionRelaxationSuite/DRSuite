@@ -13,7 +13,7 @@ env:
 #  RELEASEVERSION: ${{ github.ref_name }}
   RELEASEVERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
-  MATLAB_VERSION: R2024b
+  # MATLAB_VERSION: R2024b
 jobs:
   build:
     permissions: write-all
@@ -22,9 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         # os: [ Egret ]
-        matlab: [ R2023b, R2024a, R2024b, R2025a, R2025b ]
+        MATLAB_VERSION: [ R2023b, R2024a, R2024b, R2025a, R2025b ]
         # label: [ Gauss, LarioARM ] #, LarioX64 ]
-        os: [ ubuntu-22.04, macos-15, windows-latest ]
+        os: [ ubuntu-22.04, macos-15, macos-15-intel, windows-latest ]
       #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
       labels: [ "${{ matrix.os }}" ]
@@ -58,8 +58,8 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         id: setup-matlab
         with:
-          cache: true
-          release: ${{ env.MATLAB_VERSION }}
+          cache: false
+          release: ${{ matrix.MATLAB_VERSION }}
           products: >
             MATLAB_Compiler
             Image_Processing_Toolbox
@@ -105,10 +105,18 @@ jobs:
           unzip -q ${PACKAGE} -d test2D
 
       - name: Test 1D Workflow (Compiled)
+        if: runner.os != 'Windows'
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
         working-directory: test1D/${{ env.PKGNAME}}
         run: ./phantom_1d_workflow.sh
+
+      - name: Test 1D Workflow (Compiled)
+        if: runner.os == 'Windows'
+        env:
+          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
+        working-directory: test1D/${{ env.PKGNAME}}
+        run: ./phantom_1d_workflow.bat
 
       # - name: Save Test Output as Artifact
       #   if: github.event_name != 'release'
