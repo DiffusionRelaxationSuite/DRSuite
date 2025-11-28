@@ -119,7 +119,7 @@ jobs:
         working-directory: test1D/${{ env.PKGNAME}}
         run: |
           dir
-          phantom_1d_workflow.bat
+          ./phantom_1d_workflow.bat
 
       # - name: Save Test Output as Artifact
       #   if: github.event_name != 'release'
