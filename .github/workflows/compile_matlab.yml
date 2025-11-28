@@ -105,7 +105,7 @@ jobs:
       - name: Test 1D Workflow (Compiled)
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
-        working-directory: test1D/${PKGNAME}
+        working-directory: test1D/${{ env.PKGNAME}}
         run: ./phantom_1d_workflow.sh
 
       - name: Save Test Output as Artifact
@@ -113,7 +113,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Result1D-${{ env.SHA_SHORT }}
-          path: test1D/${PKGNAME}/Result
+          path: test1D/${{ env.PKGNAME}}/Result
           overwrite: true
 
       # - name: Test 2D Workflow (Compiled)
