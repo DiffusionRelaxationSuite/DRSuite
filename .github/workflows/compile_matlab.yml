@@ -5,15 +5,14 @@ on:
   workflow_dispatch:
   release:
     types: [created]
-  # push:
-    # branches: [main, dev]
+  push:
+    branches: [windows] #main, dev]
   # pull_request:
   #   branches: [main]
 env:
 #  RELEASEVERSION: ${{ github.ref_name }}
   RELEASEVERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
-  MATLAB_VERSION: R2023b
 jobs:
   build:
     permissions: write-all
@@ -29,6 +28,20 @@ jobs:
       labels: [ "${{ matrix.label }}" ]
 
     steps:
+      - name: Check resources
+        if: runner.os == 'Linux'
+        run: printf "$(nproc) processors, $(free --giga -h|awk '/Mem:/{ print $2 }')B\n"
+
+      - name: Check resources
+        if: runner.os == 'macOS'
+        run: printf "$(sysctl -n hw.ncpu) processors, $(top -l 1 | grep PhysMem)\n"
+
+      - name: Check resources
+        if: runner.os == 'Windows'
+        run: |
+          (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+          (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory
+
       - name: Check out repository
         uses: actions/checkout@v4
 
@@ -41,16 +54,24 @@ jobs:
         run: echo "PKGNAME=drsuite_${RELEASEVERSION}_mac_$(uname -m)" >> $GITHUB_ENV 
 
       - name: Set unix variables
+        if: runner.os != 'Windows'
         run: |
           echo "SHA_SHORT=$(git rev-parse --short "$GITHUB_SHA")" >> "$GITHUB_ENV"
           echo "PACKAGE=${PWD}/${PKGNAME}.zip" >> $GITHUB_ENV          
+
+      - name: Set environment variables for Windows
+        if: runner.os == 'Windows'
+        run: |
+          echo "SHA_SHORT=$(git rev-parse --short "$env:GITHUB_SHA")" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PKGNAME=drsuite_${env:RELEASEVERSION}_win_x64" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "PACKAGE=${PWD}/DRSuite_${env:RELEASEVERSION}_win_x64.zip" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v2
         id: setup-matlab
         with:
           cache: false
-          release: ${{ env.MATLAB_VERSION }}
+          release: ${{ matrix.MATLAB_VERSION }}
           products: >
             MATLAB_Compiler
             Image_Processing_Toolbox
@@ -65,9 +86,11 @@ jobs:
       - name: Save Binaries as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PKGNAME}}
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}
           path: ${{ env.PACKAGE }}
           overwrite: true
+
+          
 
       # - name: Test 1D Workflow (MATLAB)
       #   uses: matlab-actions/run-command@v2
@@ -78,17 +101,63 @@ jobs:
       #   uses: matlab-actions/run-command@v2
       #   with:
       #     command: "phantom_2d_workflow"          
-          
-      - name: Test 1D Workflow (Compiled)
-        env:
-          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
+
+      - name: Setup for tests
+        if: runner.os == 'Windows'
         run: |
           mkdir test1D
-          cd test1D
-          unzip -q ${PACKAGE}
-          cd ${PKGNAME}
-          PATH="${PWD}/bin:$PATH"
-          ./phantom_1d_workflow.sh
+          mkdir test2D
+          Expand-Archive -Path "${env:PACKAGE}" -DestinationPath "${PWD}/test1D"
+          Expand-Archive -Path "${env:PACKAGE}" -DestinationPath "${PWD}/test2D"
+
+      - name: Setup for tests
+        if: runner.os != 'Windows'
+        run: |
+          install -d test1D
+          install -d test2D
+          unzip -q ${PACKAGE} -d test1D
+          unzip -q ${PACKAGE} -d test2D
+
+      - name: Test 1D Workflow (Compiled)
+        if: runner.os != 'Windows'
+        env:
+          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
+        working-directory: test1D/${{ env.PKGNAME}}
+        run: ./phantom_1d_workflow.sh
+
+      - name: Test 1D Workflow (Compiled)
+        if: runner.os == 'Windows'
+        working-directory: test1D/${{ env.PKGNAME}}
+        run: |
+          ./phantom_1d_workflow.bat
+
+      - name: Test 2D Workflow (Compiled)
+        if: runner.os != 'Windows'
+        env:
+          BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
+        working-directory: test2D/${{ env.PKGNAME}}
+        run: ./phantom_2d_workflow.sh
+
+      - name: Save Test Output as Artifact
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result1D.compiled.${{ env.SHA_SHORT }}
+          path: test1D/${{ env.PKGNAME}}/Result
+          overwrite: true
+
+      - name: Test 2D Workflow (Compiled)
+        if: runner.os == 'Windows'
+        working-directory: test2D/${{ env.PKGNAME}}
+        run: |
+          ./phantom_2d_workflow.bat          
+      # - name: Save Test Output as Artifact
+      #   if: github.event_name != 'release'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Result1D-${{ env.SHA_SHORT }}
+      #     path: test1D/${{ env.PKGNAME}}/Result
+      #     overwrite: true
 
       # - name: Test 2D Workflow (Compiled)
       #   env:
@@ -97,13 +166,6 @@ jobs:
       #     PATH="${PWD}/bin:$PATH"
       #     ./phantom_2d_workflow.sh
 
-      - name: Save Test Output as Artifact
-        if: github.event_name != 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Result-${{ env.SHA_SHORT }}
-          path: Result
-          overwrite: true
         
       - name: Publish ${{ env.PACKAGE }}
         if: github.event_name == 'release'

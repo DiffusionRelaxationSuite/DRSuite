@@ -16,6 +16,7 @@
 % You should have received a copy of the GNU Lesser General Public
 % License along with this library; if not, write to the Free Software
 % Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 function package_drsuite(versno)
 % builds cli_plot_composite_maps.m  cli_plot_spectra.m  cli_solver.m
     if (nargin<1)
@@ -28,7 +29,7 @@ function package_drsuite(versno)
         [~,m]=system('uname -m'); m=strtrim(m);
         architecture=['mac_' m];
     elseif ispc
-        architecture='win';
+        architecture='win_x64';
         exec_extension='.exe';
     else % assume linux
         [~,m]=system('uname -m'); m=strtrim(m);
@@ -44,8 +45,13 @@ function package_drsuite(versno)
     copyfile('LICENSE.txt',pkgdir)
     copyfile('readme.md',pkgdir);
     copyfile('ini2struct/license.txt',fullfile(pkgdir,'ini2struct_license.txt'))
-    copyfile('phantom_1d_workflow.sh',pkgdir)
-    copyfile('phantom_2d_workflow.sh',pkgdir)
+    if ispc
+        copyfile('phantom_1d_workflow.bat',pkgdir)
+        copyfile('phantom_2d_workflow.bat',pkgdir)
+    else
+        copyfile('phantom_1d_workflow.sh',pkgdir)
+        copyfile('phantom_2d_workflow.sh',pkgdir)
+    end
     copyfile('data',fullfile(pkgdir,'data'))
     copyfile('demos',fullfile(pkgdir,'demos'))
     builddir='./build';

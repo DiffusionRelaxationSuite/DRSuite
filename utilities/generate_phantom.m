@@ -16,6 +16,7 @@
 % You should have received a copy of the GNU Lesser General Public
 % License along with this library; if not, write to the Free Software
 % Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
 function [data,im_mask,axes,K] = generate_phantom(acq,D_dic,T2_dic,D_spacing,T2_spacing,multislice)
 % Generates a phantom data_noisy
 % Input: wei_roi: 'row x col x Nc' of weighted roi's consisting 'Nc' components
