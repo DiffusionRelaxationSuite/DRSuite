@@ -21,11 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [ Egret ]
         MATLAB_VERSION: [ R2023b, R2024a, R2024b, R2025a, R2025b ]
-        # label: [ Gauss, LarioARM ] #, LarioX64 ]
         os: [ ubuntu-22.04, macos-15, macos-15-intel, windows-latest ]
-      #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
       labels: [ "${{ matrix.os }}" ]
 
@@ -74,9 +71,11 @@ jobs:
       - name: Save Binaries as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PKGNAME}}.${{ matrix.matlab }}
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}
           path: ${{ env.PACKAGE }}
           overwrite: true
+
+          
 
       # - name: Test 1D Workflow (MATLAB)
       #   uses: matlab-actions/run-command@v2
@@ -116,7 +115,7 @@ jobs:
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
         working-directory: test1D/${{ env.PKGNAME}}
-        run: ./phantom_1d_workflow.bat
+        run: phantom_1d_workflow.bat
 
       # - name: Save Test Output as Artifact
       #   if: github.event_name != 'release'
