@@ -58,7 +58,7 @@ if isempty(outprefix)
 end
 
 if isempty(spatmaskfile) || ~isfile(spatmaskfile)
-    error('No spatial mask provided, taking the whole slice as spatial Mask...')
+    error('Please provide valid spatial Mask...')
 else
     maskfile=load(spatmaskfile);
     spatROImask=maskfile.im_mask;
