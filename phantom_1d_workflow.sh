@@ -25,9 +25,8 @@ plot_avg_spectra.sh -i Result/Phantom1D_ladmm_spect.mat -m Phantom1D/Phantom_mas
     -o Result/Phantom1D_data_ladmm_avg_spectra -t png pdf
 
 # Plot spectroscopic image
-idx=9; #encoding sample chosen to show back ground MR data intensity
-plot_spect_im.sh Result/Phantom1D_ladmm_spect.mat Phantom1D/Phantom_data.mat ${idx} \
-    Phantom1D/Phantom_mask.mat Result/Phantom1D_spectroscopic_Im png
+plot_spect_im.sh -i Result/Phantom1D_ladmm_spect.mat -g Phantom1D/Phantom_data.mat \
+    -m Phantom1D/Phantom_mask.mat --enc_idx 5 -o Result/Phantom1D_spectroscopic_Im -t png eps -r 0.4
 
 # Plot component Maps
 plot_comp_maps.sh -i Result/Phantom1D_ladmm_spect.mat -m data/Phantom1D_spectrm_mask.mat \

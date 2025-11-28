@@ -20,13 +20,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        MATLAB_VERSION: [ R2025b ]
-        # MATLAB_VERSION: [ R2023b , R2024a, R2024b, R2025a, R2025b ]
-        # os: [ windows-latest ] 
-        os: [ windows-latest, ubuntu-22.04, macos-15, macos-15-intel ]
-          
+        # os: [ Gauss, LarioARM ]
+        # label: [ Gauss, LarioARM, LarioX64 ]
+        os: [ ubuntu-22.04, macos-15, windows-latest ]
+      #   os: [ ubuntu-22.04, macos-15-intel, macos-15 ]
     runs-on:
-      labels: [ "${{ matrix.os }}" ]
+      labels: [ "${{ matrix.label }}" ]
 
     steps:
       - name: Check resources
