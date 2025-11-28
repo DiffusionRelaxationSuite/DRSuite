@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   release:
     types: [created]
-  push:
+  # push:
     # branches: [windows]
   # pull_request:
   #   branches: [main]
