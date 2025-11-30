@@ -222,6 +222,6 @@ fi
     # 'outprefix','Phantom1D/Phantom1D_data_ladmm_avg_spectra','linewidth',3,'ax_scale',{'log'},'color','g','cbar',1, ...
     # 'ax_lim',"[10 200]", 'file_types', {'png','pdf'});
 echo Running "${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
-"${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
+"${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types "${output_types}"
 
 exit
