@@ -95,10 +95,10 @@ jobs:
 
           
 
-      # - name: Test 1D Workflow (MATLAB)
-      #   uses: matlab-actions/run-command@v2
-      #   with:
-      #     command: "phantom_1d_workflow"
+      - name: Test 1D Workflow (MATLAB)
+        uses: matlab-actions/run-command@v2
+        with:
+          command: "phantom_1d_workflow"
 
       # - name: Test 2D Workflow (MATLAB)
       #   uses: matlab-actions/run-command@v2
