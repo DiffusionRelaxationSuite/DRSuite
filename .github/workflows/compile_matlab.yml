@@ -13,6 +13,8 @@ env:
 #  RELEASEVERSION: ${{ github.ref_name }}
   RELEASEVERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
+  CACHE_MATLAB: true
+
 jobs:
   build:
     permissions: write-all
@@ -23,10 +25,11 @@ jobs:
         MATLAB_VERSION: [ R2025b ]
         # MATLAB_VERSION: [ R2023b , R2024a, R2024b, R2025a, R2025b ]
         # os: [ windows-latest, ubuntu-22.04, macos-15, macos-15-intel ]
-        os: [ windows-latest, ubuntu-22.04, macos-15 ]
+        # os: [ windows-latest, ubuntu-22.04, macos-15 ]
+        os: [ linux ]
           
     runs-on:
-      labels: [ "${{ matrix.os }}" ]
+      labels: [ self-hosted, "${{ matrix.os }}" ]
 
     steps:
       - name: Check resources
@@ -71,7 +74,7 @@ jobs:
         uses: matlab-actions/setup-matlab@v2
         id: setup-matlab
         with:
-          cache: false
+          cache: ${{ env.CACHE_MATLAB }}
           release: ${{ matrix.MATLAB_VERSION }}
           products: >
             MATLAB_Compiler
@@ -93,10 +96,10 @@ jobs:
 
           
 
-      # - name: Test 1D Workflow (MATLAB)
-      #   uses: matlab-actions/run-command@v2
-      #   with:
-      #     command: "phantom_1d_workflow"
+      - name: Test 1D Workflow (MATLAB)
+        uses: matlab-actions/run-command@v2
+        with:
+          command: "phantom_1d_workflow"
 
       # - name: Test 2D Workflow (MATLAB)
       #   uses: matlab-actions/run-command@v2

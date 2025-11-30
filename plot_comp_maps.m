@@ -97,7 +97,7 @@ if isempty(file_types)
     %available formats, if no valid inputs given, it plots a png file
     plot_info.file_types="png";
 else
-    file_types=string(file_types);
+    file_types=split(string(file_types));
     validExts = ["fig","m","eps","epsc","ai","pdf","bmp","jpg","jpeg","png","tif","tiff"];
     idx = ismember(lower(file_types), validExts);
     validOnes   = file_types(idx);
