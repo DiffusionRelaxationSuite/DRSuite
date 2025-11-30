@@ -25,10 +25,10 @@ fi
 # environment variable
 #BrainSuiteMCR="/path/to/your/MCR";
 
-if [ -z "$BrainSuiteMCR" ]; then
-  if [ -e ${DefaultRuntimePath} ]; then
+if [[ -z "$BrainSuiteMCR" ]]; then
+  if [[ -e "${DefaultRuntimePath}" ]]; then
     BrainSuiteMCR="${DefaultRuntimePath}";
-  elif [ -e ${DefaultInstallPath}/runtime ]; then
+  elif [[ -e "${DefaultInstallPath}/runtime" ]]; then
     BrainSuiteMCR="${DefaultInstallPath}";
     echo
     echo "Located Matlab installation with runtime directory ${BrainSuiteMCR}."
@@ -53,7 +53,7 @@ if [ -z "$BrainSuiteMCR" ]; then
   fi
 fi
 
-if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
+if [[ ! -e "${BrainSuiteMCR}/${TestFile}" ]]; then
   echo
   echo "Could not find a valid installation of MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler] at following location:"
   echo ${BrainSuiteMCR}
@@ -96,7 +96,7 @@ note: all arguments are required!
 EOF
 
 # Parse inputs
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
   echo
   echo "$usage"
   echo
@@ -147,25 +147,25 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$spectfile" = "x" ]; then
+if [[ -z "$spectfile" ]]; then
   errs="${errs}\nNo input spectral file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$spectfile" ]; then
+  if [[ ! -f "$spectfile" ]]; then
     errs="${errs}\Input spectral file $spectfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$acqfile" = "x" ]; then
+if [[ -z "$acqfile" ]]; then
   errs="${errs}\nNo image file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$acqfile" ]; then
+  if [[ ! -f "$acqfile" ]]; then
     errs="${errs}\nImage file $acqfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$outputdir" = "x" ]; then
+if [[ -z "$outputdir" ]]; then
   errs="${errs}\nNo output prefix provided -- -o option is required!"
   ArgsOK=0
 fi

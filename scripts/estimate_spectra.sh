@@ -25,10 +25,10 @@ fi
 # environment variable
 #BrainSuiteMCR="/path/to/your/MCR";
 
-if [ -z "$BrainSuiteMCR" ]; then
-  if [ -e ${DefaultRuntimePath} ]; then
+if [[ -z "$BrainSuiteMCR" ]]; then
+  if [[ -e "${DefaultRuntimePath}" ]]; then
     BrainSuiteMCR="${DefaultRuntimePath}";
-  elif [ -e ${DefaultInstallPath}/runtime ]; then
+  elif [[ -e "${DefaultInstallPath}/runtime" ]]; then
     BrainSuiteMCR="${DefaultInstallPath}";
     echo
     echo "Located Matlab installation with runtime directory ${BrainSuiteMCR}."
@@ -53,7 +53,7 @@ if [ -z "$BrainSuiteMCR" ]; then
   fi
 fi
 
-if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
+if [[ ! -e "${BrainSuiteMCR}/${TestFile}" ]]; then
   echo
   echo "Could not find a valid installation of MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler] at following location:"
   echo ${BrainSuiteMCR}
@@ -98,7 +98,7 @@ note: all arguments except --cost_calc are required!
 EOF
 
 # Parse inputs
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
   echo
   echo "$usage"
   echo
@@ -159,33 +159,33 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$input_file" = "x" ]; then
+if [[ -z "$input_file" ]]; then
   errs="${errs}\nNo input file provided -- -i option is required!"
   ArgsOK=0
 fi
-if [ "x$output_file" = "x" ]; then
+if [[ -z "$output_file" ]]; then
   errs="${errs}\nNo output file provided -- -o option is required!"
   ArgsOK=0
 fi
-if [ "x$mask_file" = "x" ]; then
+if [[ -z "$mask_file" ]]; then
   errs="${errs}\nNo mask file provided -- -m option is required!"
   ArgsOK=0
 fi
-if [ "x$dict_file" = "x" ]; then
+if [[ -z "$dict_file" ]]; then
   errs="${errs}\nNo spectral information file provided -- -d option is required!"   ### CHANGED: fixed message
   ArgsOK=0
 fi
-if [ "x$config_file" = "x" ]; then
+if [[ -z "$config_file" ]]; then
   errs="${errs}\nNo config file provided -- -c option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$config_file" ]; then
+  if [[ ! -f "$config_file" ]]; then
     errs="${errs}\nConfig file $config_file does not exist!"
     ArgsOK=0
   fi
 fi
 
-if [ ! -f "$input_file" ]; then
+if [[ ! -f "$input_file" ]]; then
   errs="${errs}\nInput file $input_file does not exist!"
   ArgsOK=0
 fi

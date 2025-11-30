@@ -31,10 +31,10 @@ fi
 # environment variable
 #BrainSuiteMCR="/path/to/your/MCR";
 
-if [ -z "$BrainSuiteMCR" ]; then
-  if [ -e ${DefaultRuntimePath} ]; then
+if [[ -z "$BrainSuiteMCR" ]]; then
+  if [[ -e "${DefaultRuntimePath}" ]]; then
     BrainSuiteMCR="${DefaultRuntimePath}";
-  elif [ -e ${DefaultInstallPath}/runtime ]; then
+  elif [[ -e "${DefaultInstallPath}/runtime" ]]; then
     BrainSuiteMCR="${DefaultInstallPath}";
     echo
     echo "Located Matlab installation with runtime directory ${BrainSuiteMCR}."
@@ -59,7 +59,7 @@ if [ -z "$BrainSuiteMCR" ]; then
   fi
 fi
 
-if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
+if [[ ! -e "${BrainSuiteMCR}/${TestFile}" ]]; then
   echo
   echo "Could not find a valid installation of MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler] at following location:"
   echo ${BrainSuiteMCR}
@@ -111,7 +111,7 @@ note: all arguments are required!
 EOF
 
 # Parse inputs
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
   echo
   echo "$usage"
   echo
@@ -157,8 +157,7 @@ while [[ $# -gt 0 ]]; do
       shift
       arg=$1
       while [[ ! ${arg:0:1} == "-" ]]; do
-        # output_types="$output_types $1"
-        output_types="$1"
+        output_types="${output_types}${output_types:+" "}$1"
         shift
         arg=$1
         if (($#<1)); then break; fi
@@ -203,29 +202,29 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$spectfile" = "x" ]; then
+if [[ -z "$spectfile" ]]; then
   errs="${errs}\nNo input spectral file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$spectfile" ]; then
+  if [[ ! -f "$spectfile" ]]; then
     errs="${errs}\Input spectral file $spectfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$maskfile" = "x" ]; then
+if [[ -z "$maskfile" ]]; then
   errs="${errs}\nNo mask file provided -- -m option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$maskfile" ]; then
+  if [[ ! -f "$maskfile" ]]; then
     errs="${errs}\Mask file $maskfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$output_prefix" = "x" ]; then
+if [[ -z "$output_prefix" ]]; then
   errs="${errs}\nNo output prefix provided -- -o option is required!"
   ArgsOK=0
 fi
-if [ "x$output_types" = "x" ]; then
+if [[ -z "$output_types" ]]; then
   errs="${errs}\nNo output image types provided -- -t option is required!"
   ArgsOK=0
 fi
@@ -234,14 +233,14 @@ fi
 # String-valued options (ax_scale, ax_lims, color) are left for MATLAB to validate
 # so we don't duplicate detailed logic here.
 
-if [ -n "$nlevel" ]; then
+if [[ -n "$nlevel" ]]; then
   if ! [[ "$nlevel" =~ ^[0-9]+$ ]]; then
     errs="${errs}\nInvalid nlevel '$nlevel'. Must be a positive integer."
     ArgsOK=0
   fi
 fi
 
-if [ -n "$linewidth" ]; then
+if [[ -n "$linewidth" ]]; then
   # simple numeric check (integer or float, >0)
   if ! [[ "$linewidth" =~ ^([1-9][0-9]*|[0-9]*\.[0-9]+)$ ]]; then
     errs="${errs}\nInvalid linewidth '$linewidth'. Must be a positive number."
@@ -249,7 +248,7 @@ if [ -n "$linewidth" ]; then
   fi
 fi
 
-if [ -n "$cbar" ]; then
+if [[ -n "$cbar" ]]; then
   if ! [[ "$cbar" =~ ^[0-9]+$ ]]; then
     errs="${errs}\nInvalid cbar '$cbar'. Must be 0 or 1."
     ArgsOK=0
@@ -295,24 +294,24 @@ fi
 #    'ax_lim',"[10 200]", 'file_types', {'png','pdf'});
 
 # NEW: build argument list as an array so that things like "[10 200]" stay a single argument
-ARGS=( spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types} )
+ARGS=( spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types "${output_types}" )
 
-if [ -n "$ax_scale" ]; then
+if [[ -n "$ax_scale" ]]; then
   ARGS+=( ax_scale "$ax_scale" )
 fi
-if [ -n "$ax_lims" ]; then
+if [[ -n "$ax_lims" ]]; then
   ARGS+=( ax_lims "$ax_lims" )
 fi
-if [ -n "$cmap" ]; then
+if [[ -n "$cmap" ]]; then
   ARGS+=( color "$cmap" )
 fi
-if [ -n "$nlevel" ]; then
+if [[ -n "$nlevel" ]]; then
   ARGS+=( nlevel "$nlevel" )
 fi
-if [ -n "$linewidth" ]; then
+if [[ -n "$linewidth" ]]; then
   ARGS+=( linewidth "$linewidth" )
 fi
-if [ -n "$cbar" ]; then
+if [[ -n "$cbar" ]]; then
   ARGS+=( cbar "$cbar" )
 fi
 

@@ -6,14 +6,14 @@ on:
   release:
     types: [created]
   push:
-    branches: [main,dev]
+    # branches: [main,dev]
   # pull_request:
   #   branches: [main]
 env:
 #  RELEASEVERSION: ${{ github.ref_name }}
   RELEASEVERSION: 25a
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_TOKEN }}
-  CACHE_MATLAB: true
+  CACHE_MATLAB: false
 
 jobs:
   build:
@@ -87,26 +87,40 @@ jobs:
         with:
           command: package_drsuite("${{ env.RELEASEVERSION }}")
           
-      - name: Save Binaries as Artifact
+      - name: Save binaries as artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}
           path: ${{ env.PACKAGE }}
           overwrite: true
 
-          
-
-      - name: Test 1D Workflow (MATLAB)
+      - name: Test 1D workflow (matlab)
         uses: matlab-actions/run-command@v2
         with:
           command: "phantom_1d_workflow"
 
-      # - name: Test 2D Workflow (MATLAB)
-      #   uses: matlab-actions/run-command@v2
-      #   with:
-      #     command: "phantom_2d_workflow"          
+      - name: Save 1D test output as artifact
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result1D.matlab.${{ env.SHA_SHORT }}
+          path: Phantom1D
+          overwrite: true
+                    
+      - name: Test 2D workflow (matlab)
+        uses: matlab-actions/run-command@v2
+        with:
+          command: "phantom_2d_workflow"          
 
-      - name: Setup for tests
+      - name: Save 2D test output as artifact
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result2D.matlab.${{ env.SHA_SHORT }}
+          path: Phantom2D
+          overwrite: true
+
+      - name: Setup for compiled tests (mac/linux)
         if: runner.os == 'Windows'
         run: |
           mkdir test1D
@@ -114,7 +128,7 @@ jobs:
           Expand-Archive -Path "${env:PACKAGE}" -DestinationPath "${PWD}/test1D"
           Expand-Archive -Path "${env:PACKAGE}" -DestinationPath "${PWD}/test2D"
 
-      - name: Setup for tests
+      - name: Setup for tests (windows)
         if: runner.os != 'Windows'
         run: |
           install -d test1D
@@ -122,39 +136,47 @@ jobs:
           unzip -q ${PACKAGE} -d test1D
           unzip -q ${PACKAGE} -d test2D
 
-      - name: Test 1D Workflow (Compiled)
+      - name: Test 1D workflow (compiled mac/linux)
         if: runner.os != 'Windows'
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
         working-directory: test1D/${{ env.PKGNAME}}
         run: ./phantom_1d_workflow.sh
 
-      - name: Test 1D Workflow (Compiled)
+      - name: Test 1D workflow (compiled windows)
         if: runner.os == 'Windows'
         working-directory: test1D/${{ env.PKGNAME}}
         run: |
           ./phantom_1d_workflow.bat
 
-      - name: Save Test Output as Artifact
+      - name: Save 1D test output (compiled) as artifact
         if: github.event_name != 'release'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result1D.compiled.${{ env.SHA_SHORT }}
-          path: test1D/${{ env.PKGNAME}}/Result
+          path: test1D/${{ env.PKGNAME}}/Phantom1D
           overwrite: true
 
-      - name: Test 2D Workflow (Compiled)
+      - name: Test 2D workflow (compiled, mac/linux)
         if: runner.os != 'Windows'
         env:
           BrainSuiteMCR: ${{ steps.setup-matlab.outputs.matlabroot }}
         working-directory: test2D/${{ env.PKGNAME}}
         run: ./phantom_2d_workflow.sh
 
-      - name: Test 2D Workflow (Compiled)
+      - name: Test 2D workflow (compiled, windows)
         if: runner.os == 'Windows'
         working-directory: test2D/${{ env.PKGNAME}}
         run: |
           ./phantom_2d_workflow.bat
+
+      - name: Save 2D test output (compiled) as artifact
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PKGNAME}}.${{ matrix.os }}.${{ matrix.MATLAB_VERSION }}.Result2D.compiled.${{ env.SHA_SHORT }}
+          path: test2D/${{ env.PKGNAME}}/Phantom2D
+          overwrite: true
 
       - name: Publish ${{ env.PACKAGE }}
         if: github.event_name == 'release'

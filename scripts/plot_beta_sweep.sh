@@ -25,10 +25,10 @@ fi
 # environment variable
 #BrainSuiteMCR="/path/to/your/MCR";
 
-if [ -z "$BrainSuiteMCR" ]; then
-  if [ -e ${DefaultRuntimePath} ]; then
+if [[ -z "$BrainSuiteMCR" ]]; then
+  if [[ -e "${DefaultRuntimePath}" ]]; then
     BrainSuiteMCR="${DefaultRuntimePath}";
-  elif [ -e ${DefaultInstallPath}/runtime ]; then
+  elif [[ -e "${DefaultInstallPath}/runtime" ]]; then
     BrainSuiteMCR="${DefaultInstallPath}";
     echo
     echo "Located Matlab installation with runtime directory ${BrainSuiteMCR}."
@@ -53,7 +53,7 @@ if [ -z "$BrainSuiteMCR" ]; then
   fi
 fi
 
-if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
+if [[ ! -e "${BrainSuiteMCR}/${TestFile}" ]]; then
   echo
   echo "Could not find a valid installation of MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler] at following location:"
   echo ${BrainSuiteMCR}
@@ -98,7 +98,7 @@ note: all arguments are required!
 EOF
 
 # Parse inputs
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
   echo
   echo "$usage"
   echo
@@ -149,7 +149,7 @@ while [[ $# -gt 0 ]]; do
       shift
       arg=$1
       while [[ ! ${arg:0:1} == "-" ]]; do
-        output_types="$output_types $1"
+        output_types="${output_types}${output_types:+" "}$1"
         shift
         arg=$1
         if (($#<1)); then break; fi
@@ -169,47 +169,47 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$imgfile" = "x" ]; then
+if [[ -z "$imgfile" ]]; then
   errs="${errs}\nNo input spectral file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$imgfile" ]; then
+  if [[ ! -f "$imgfile" ]]; then
     errs="${errs}\nInput spectral file $imgfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$betafile" = "x" ]; then
+if [[ -z "$betafile" ]]; then
   errs="${errs}\nNo beta file provided -- -b option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$betafile" ]; then
+  if [[ ! -f "$betafile" ]]; then
     errs="${errs}\nBeta file $betafile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$spectmask" = "x" ]; then
+if [[ -z "$spectmask" ]]; then
   errs="${errs}\nNo spectral mask file provided -- -m option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$spectmask" ]; then
+  if [[ ! -f "$spectmask" ]]; then
     errs="${errs}\nSpectral mask file $spectmask does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$configfile" = "x" ]; then
+if [[ -z "$configfile" ]]; then
   errs="${errs}\nNo config file provided -- -c option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$configfile" ]; then
+  if [[ ! -f "$configfile" ]]; then
     errs="${errs}\nColor file $configfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$output_prefix" = "x" ]; then
+if [[ -z "$output_prefix" ]]; then
   errs="${errs}\nNo output prefix provided -- -o option is required!"
   ArgsOK=0
 fi
-if [ "x$output_types" = "x" ]; then
+if [[ -z "$output_types" ]]; then
   errs="${errs}\nNo output image types provided -- -t option is required!"
   ArgsOK=0
 fi
@@ -248,6 +248,6 @@ fi
     spect_infofile "${spectrum_info_file}" \
     outprefix "${output_prefix}" \
     configfile "${configfile}" spatmaskfile \
-    "${spatmaskfile}" file_types ${output_types}
+    "${spatmaskfile}" file_types "${output_types}"
 
 exit

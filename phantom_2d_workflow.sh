@@ -3,7 +3,7 @@ set -e
 RootDir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
 PATH="$RootDir/bin:$PATH"
 
-if [[ "$NO_COLOR" == "" ]]; then Color="\33[0;32m"; Clear="\33[0;0m"; fi;
+if [[ -z "$NO_COLOR" ]]; then Color="\33[0;32m"; Clear="\33[0;0m"; fi;
 printf "${Color}Creating phantom with 2D spectral encoding.${Clear}\n"
 
 printf "${Color}Creating phantom...${Clear}\n"
@@ -45,7 +45,7 @@ plot_avg_spectra.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat \
     --spatmaskfile Phantom2D/Phantom_mask.mat \
     --outprefix Phantom2D/Phantom2D_data_ladmm_avg_spectra \
     --cbar 0 --color jet --linewidth 3 --ax_scale log \
-    --ax_lims "[ 0.05 2 10 200]" --nlevel 15 --file_types png
+    --ax_lims "[ 0.05 2 10 200]" --nlevel 15 --file_types "png pdf"
 
 printf "${Color}Plotting spectroscopic image...${Clear}\n"
 plot_spect_im.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat \

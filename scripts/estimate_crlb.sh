@@ -26,10 +26,10 @@ fi
 # environment variable
 #BrainSuiteMCR="/path/to/your/MCR";
 
-if [ -z "$BrainSuiteMCR" ]; then
-  if [ -e ${DefaultRuntimePath} ]; then
+if [[ -z "$BrainSuiteMCR" ]]; then
+  if [[ -e "${DefaultRuntimePath}" ]]; then
     BrainSuiteMCR="${DefaultRuntimePath}";
-  elif [ -e ${DefaultInstallPath}/runtime ]; then
+  elif [[ -e "${DefaultInstallPath}/runtime" ]]; then
     BrainSuiteMCR="${DefaultInstallPath}";
     echo
     echo "Located Matlab installation with runtime directory ${BrainSuiteMCR}."
@@ -55,7 +55,7 @@ if [ -z "$BrainSuiteMCR" ]; then
   fi
 fi
 
-if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
+if [[ ! -e "${BrainSuiteMCR}/${TestFile}" ]]; then
   echo
   echo "Could not find a valid installation of MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler] at following location:"
   echo ${BrainSuiteMCR}
@@ -98,7 +98,7 @@ note: both arguments are required!
 EOF
 
 # Parse inputs
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
   echo
   echo "$usage"
   echo
@@ -139,17 +139,17 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$funcfile" = "x" ]; then
+if [[ -z "$funcfile" ]]; then
   errs="${errs}\nNo function expression file provided -- --funcfile option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$funcfile" ]; then
+  if [[ ! -f "$funcfile" ]]; then
     errs="${errs}\nFunction expression file $funcfile does not exist!"
     ArgsOK=0
   fi
 fi
 
-if [ "x$outprefix" = "x" ]; then
+if [[ -z "$outprefix" ]]; then
   errs="${errs}\nNo output prefix provided -- --outprefix option is required!"
   ArgsOK=0
 fi

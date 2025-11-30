@@ -30,10 +30,10 @@ fi
 # environment variable
 #BrainSuiteMCR="/path/to/your/MCR";
 
-if [ -z "$BrainSuiteMCR" ]; then
-  if [ -e ${DefaultRuntimePath} ]; then
+if [[ -z "$BrainSuiteMCR" ]]; then
+  if [[ -e "${DefaultRuntimePath}" ]]; then
     BrainSuiteMCR="${DefaultRuntimePath}";
-  elif [ -e ${DefaultInstallPath}/runtime ]; then
+  elif [[ -e "${DefaultInstallPath}/runtime" ]]; then
     BrainSuiteMCR="${DefaultInstallPath}";
     echo
     echo "Located Matlab installation with runtime directory ${BrainSuiteMCR}."
@@ -58,7 +58,7 @@ if [ -z "$BrainSuiteMCR" ]; then
   fi
 fi
 
-if [ ! -e ${BrainSuiteMCR}/${TestFile} ]; then
+if [[ ! -e "${BrainSuiteMCR}/${TestFile}" ]]; then
   echo
   echo "Could not find a valid installation of MCR ${MATLABRelease} (${MATLABVersNum}) [or Matlab ${MATLABRelease} with Matlab Compiler] at following location:"
   echo ${BrainSuiteMCR}
@@ -109,7 +109,7 @@ note: all required arguments must be provided!
 EOF
 
 # Parse inputs
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
   echo
   echo "$usage"
   echo
@@ -154,8 +154,7 @@ while [[ $# -gt 0 ]]; do
       shift
       arg=$1
       while [[ ! ${arg:0:1} == "-" ]]; do
-        # As in other wrappers: only the final type is used currently
-        output_types="$1"
+        output_types="${output_types}${output_types:+" "}$1"
         shift
         arg=$1
         if (($#<1)); then break; fi
@@ -183,44 +182,44 @@ done
 ArgsOK=1
 errs=""
 
-if [ "x$spectfile" = "x" ]; then
+if [[ -z "$spectfile" ]]; then
   errs="${errs}\nNo input spectral file provided -- -i option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$spectfile" ]; then
+  if [[ ! -f "$spectfile" ]]; then
     errs="${errs}\nInput spectral file $spectfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$spectmask_file" = "x" ]; then
+if [[ -z "$spectmask_file" ]]; then
   errs="${errs}\nNo spectral mask file provided -- -m option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$spectmask_file" ]; then
+  if [[ ! -f "$spectmask_file" ]]; then
     errs="${errs}\nSpectral mask file $spectmask_file does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$colorfile" = "x" ]; then
+if [[ -z "$colorfile" ]]; then
   errs="${errs}\nNo color file provided -- -c option is required!"
   ArgsOK=0
 else
-  if [ ! -f "$colorfile" ]; then
+  if [[ ! -f "$colorfile" ]]; then
     errs="${errs}\nColor file $colorfile does not exist!"
     ArgsOK=0
   fi
 fi
-if [ "x$output_prefix" = "x" ]; then
+if [[ -z "$output_prefix" ]]; then
   errs="${errs}\nNo output prefix provided -- -o option is required!"
   ArgsOK=0
 fi
-if [ "x$output_types" = "x" ]; then
+if [[ -z "$output_types" ]]; then
   errs="${errs}\nNo output image types provided -- -t option is required!"
   ArgsOK=0
 fi
 
 # (Optional) tiny validation for cbar (0/1)
-if [ -n "$cbar" ]; then
+if [[ -n "$cbar" ]]; then
   if ! [[ "$cbar" =~ ^[0-9]+$ ]]; then
     errs="${errs}\nInvalid cbar '$cbar'. Must be 0 or 1."
     ArgsOK=0
@@ -261,12 +260,12 @@ else
 fi
 
 # Build argument list so we can conditionally append optional params
-ARGS=( spect_imfile "${spectfile}" spectmaskfile "${spectmask_file}" color "${colorfile}" outprefix "${output_prefix}" file_types ${output_types} )
+ARGS=( spect_imfile "${spectfile}" spectmaskfile "${spectmask_file}" color "${colorfile}" outprefix "${output_prefix}" file_types "${output_types}" )
 
-if [ -n "$weights" ]; then
+if [[ -n "$weights" ]]; then
   ARGS+=( weights "$weights" )
 fi
-if [ -n "$cbar" ]; then
+if [[ -n "$cbar" ]]; then
   ARGS+=( cbar "$cbar" )
 fi
 

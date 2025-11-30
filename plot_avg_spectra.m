@@ -208,7 +208,7 @@ else
     end
     plot_info.linewidth=linewidth;
 end
-if isempty(file_types)
+if isempty(strtrim(file_types))
     %Input for figure extension types. Default is png. If user gives input
     %among the available types (not case sensitive), it plots them in the
     %available formats, if no valid inputs given, it plots a png file
