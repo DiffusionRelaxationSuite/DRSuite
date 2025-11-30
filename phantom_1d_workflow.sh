@@ -1,34 +1,57 @@
 #!/bin/bash
+# set -e
 RootDir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
 PATH="$RootDir/bin:$PATH"
 
-set -ex
-# create phantom with 2D spectral encoding
-# Phantom generation
-install -d Result
+if [[ "$NO_COLOR" == "" ]]; then Color="\33[0;32m"; Clear="\33[0;0m"; fi;
+printf "${Color}Creating phantom with 1D spectral encoding.${Clear}\n"
 
-create_phantom.sh -a data/acq_phantom1D.txt -i data/Phantom1D_spect.txt -o Phantom1D
-# spectrum Estimation --ladmm
-estimate_spectra.sh -i Phantom1D/Phantom_data.mat -m Phantom1D/Phantom_mask.mat \
-    -d Phantom1D/Phantom_spectrm_info.mat -c demos/Phantom1D_ladmm.ini -o Result/Phantom1D_ladmm_spect.mat
+printf "${Color}Creating phantom...${Clear}\n"
+create_phantom.sh --acqfile data/acq_phantom1D.txt --spectfile data/Phantom1D_spect.txt \
+    --outfolder Phantom1D --multislice 0
 
-# spectrum Estimation --admm
-# spectEstimation Phantom1D/Phantom_data.mat Phantom1D/Phantom_mask.mat \
-#     Phantom1D/Phantom_spectrm_info.mat demos/Phantom_admm.ini Result/Phantom1D_admm_spect.mat)
-# 
-#spectrum Estimation --nnls
-# spectEstimation Phantom1D/Phantom_data.mat Phantom1D/Phantom_mask.mat \
-#     Phantom1D/Phantom_spectrm_info.mat demos/Phantom_nnls.ini Result/Phantom1D_nnls_spect.mat)
+printf "${Color}Running beta sweep...${Clear}\n"
+plot_beta_sweep.sh --imgfile Phantom1D/Phantom_data.mat --betafile data/betafile_phantom1d.txt \
+    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --outprefix Phantom1D/Phantom_data_ladmm_spect --configfile demos/Phantom1D_ladmm.ini \
+    --spatmaskfile Phantom1D/Phantom_mask_beta_calc.mat --file_types png
 
-#plot Average spectra
-plot_avg_spectra.sh -i Result/Phantom1D_ladmm_spect.mat -m Phantom1D/Phantom_mask.mat \
-    -o Result/Phantom1D_data_ladmm_avg_spectra -t png pdf
+printf "${Color}Estimating spectra (ladmm)...${Clear}\n"
+estimate_spectra.sh --imgfile Phantom1D/Phantom_data.mat \
+    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --outprefix Phantom1D/Phantom1D_data_ladmm_spect.mat \
+    --configfile demos/Phantom1D_ladmm.ini --spatmaskfile Phantom1D/Phantom_mask.mat
 
-# Plot spectroscopic image
-plot_spect_im.sh -i Result/Phantom1D_ladmm_spect.mat -g Phantom1D/Phantom_data.mat \
-    -m Phantom1D/Phantom_mask.mat --enc_idx 5 -o Result/Phantom1D_spectroscopic_Im -t png eps -r 0.4
+printf "${Color}Estimating spectra (admm)...${Clear}\n"
+estimate_spectra.sh --imgfile Phantom1D/Phantom_data.mat \
+    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --outprefix Phantom1D/Phantom1D_data_admm_spect.mat \
+    --configfile demos/Phantom1D_admm.ini --spatmaskfile Phantom1D/Phantom_mask.mat
 
-# Plot component Maps
-plot_comp_maps.sh -i Result/Phantom1D_ladmm_spect.mat -m data/Phantom1D_spectrm_mask.mat \
-    -c data/four_color.mat -o Result/Phantom1D_component_maps -t png epsc
+printf "${Color}Estimating spectra (nnls)...${Clear}\n"
+estimate_spectra.sh --imgfile Phantom1D/Phantom_data.mat \
+    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --outprefix Phantom1D/Phantom1D_data_nnls_spect.mat \
+    --configfile demos/Phantom1D_nnls.ini --spatmaskfile Phantom1D/Phantom_mask.mat
 
+printf "${Color}Plotting average spectra...${Clear}\n"
+plot_avg_spectra.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
+    --spatmaskfile Phantom1D/Phantom_mask.mat \
+    --outprefix Phantom1D/Phantom1D_data_ladmm_avg_spectra --linewidth 3 \
+    --ax_scale log --color g --cbar 1 --ax_lim "[10 200]" \
+    --file_types "png pdf"
+
+printf "${Color}Plotting spectroscopic image...${Clear}\n"
+plot_spect_im.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
+    --imgfile Phantom1D/Phantom_data.mat --spatmaskfile Phantom1D/Phantom_mask.mat \
+    --outprefix Phantom1D/Phantom1D_data_spectroscopic_Im --threshold .2 \
+    --linewidth 1 --enc_idx 8 --ax_scale log --color g \
+    --ax_lim "[10 200]" --file_types "png jpg"
+
+printf "${Color}Plotting component maps...${Clear}\n"
+plot_comp_maps.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
+    --spectmaskfile data/Phantom1D_spectrm_mask.mat \
+    --color data/four_color.mat --outprefix Phantom1D/Phantom1D_component_maps \
+    --cbar 0 --weights "[1 3]"
+
+printf "${Color}Finished phantom 1D workflow!${Clear}\n"
