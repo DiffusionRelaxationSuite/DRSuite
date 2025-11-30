@@ -141,5 +141,8 @@ else
 end
 fprintf(1,'Saving CostFunction vs iter plot for multiple beta to %s*.\n',outprefix);
 plot_and_save_for_beta_calc(img,spatROImask,spectInfo,params,outprefix,plot_info.file_types)
+if (ismcc || isdeployed)
+    close all
+end
 fprintf(1,'Total program time: %f seconds\n',toc(programTimer))
 return

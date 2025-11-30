@@ -7,12 +7,12 @@
 % The DRSuite is free software; you can redistribute it and/or
 % modify it under the terms of the GNU Lesser General Public License
 % as published by the Free Software Foundation, version 2.1.
-% 
+%
 % This program is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 % Lesser General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU Lesser General Public
 % License along with this library; if not, write to the Free Software
 % Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
@@ -121,6 +121,9 @@ solverTimer=tic;
 if  params.beta_calc && ~strcmpi(params.solver.name,'nnls')
     [spectral_image,out]=run_solver(img,spatROImask,spectInfo,params);
     plot_cost_vs_iter(out,params,outprefix)
+    if (ismcc || isdeployed)
+        close all
+    end
     % out_sum=0;
     % min_len=Inf;
     % for i=1:length(out)
@@ -130,7 +133,7 @@ if  params.beta_calc && ~strcmpi(params.solver.name,'nnls')
     %     out_sum=out_sum+out(i).cost1(1:min_len)+out(i).cost2(1:min_len);
     % end
     % fig = figure('Color','w','Units','pixels','Position',[200 200 400 800],'Visible', 'off');
-    % ax = axes('Parent',fig);   
+    % ax = axes('Parent',fig);
     % figure(fig);
     % semilogy(0:length(out_sum)-1,out_sum);
     % xlabel(strcat("iteration number x",num2str(params.solver.save_inter),""));
@@ -138,12 +141,12 @@ if  params.beta_calc && ~strcmpi(params.solver.name,'nnls')
     % xlim([0 length(out_sum)-1])
     % ylabel('cost function');
     % title('Averaged Cost Function vs iter no.')
-    % set(gca, 'Color', 'w'); 
+    % set(gca, 'Color', 'w');
     % set(findall(gcf, 'Type', 'text'), 'Color', 'k');
-    % 
+    %
     % % Make axis tick labels and axes lines black
     % set(gca, 'XColor', 'k', 'YColor', 'k', 'ZColor', 'k');
-    % 
+    %
     % axis square
     % ofname=sprintf('%s_costVsiter_single_beta',outprefix);
     % fprintf(1,'Saving %s.png\n', ofname);
