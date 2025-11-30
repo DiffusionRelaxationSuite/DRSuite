@@ -21,6 +21,8 @@ function create_phantom(varargin)
 %example
 %create_phantom() or create_phantom('acqfile','data/acq_phantom.txt','spectfile','data/Phantom_spect.txt','outfolder','Phantom1')
 p = inputParser;
+p.CaseSensitive = true;     
+p.PartialMatching = false; 
 addParameter(p, 'acqfile', '', @(x)ischar(x) || isstring(x));
 addParameter(p, 'spectfile', '', @(x)ischar(x) || isstring(x));
 addParameter(p, 'outfolder', '', @(x)ischar(x) || isstring(x));

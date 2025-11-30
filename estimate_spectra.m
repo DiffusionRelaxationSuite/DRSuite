@@ -20,6 +20,8 @@
 function estimate_spectra(varargin)
 programTimer=tic;
 p = inputParser;
+p.CaseSensitive = true;     
+p.PartialMatching = false; 
 %required i/p
 addParameter(p, 'imgfile', '', @(x)ischar(x) || isstring(x));
 addParameter(p, 'spect_infofile', '', @(x)ischar(x) || isstring(x));%optional

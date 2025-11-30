@@ -45,7 +45,7 @@ plot_avg_spectra.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat \
     --spatmaskfile Phantom2D/Phantom_mask.mat \
     --outprefix Phantom2D/Phantom2D_data_ladmm_avg_spectra \
     --cbar 0 --color jet --linewidth 3 --ax_scale log \
-    --ax_lims "[ 0.05 2 10 200]" --nlevel 15 --file_types "png pdf"
+    --ax_lims "[ 0.05 2 10 200]" --nlevel 15 --file_types png
 
 printf "${Color}Plotting spectroscopic image...${Clear}\n"
 plot_spect_im.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat \
@@ -60,6 +60,6 @@ printf "${Color}Plotting component maps...${Clear}\n"
 plot_comp_maps.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat --outprefix \
     Phantom2D/Phantom2D_data_component_maps --spectmaskfile \
     data/Phantom2D_spectrm_mask.mat \
-    --cbar 1 --weights "[1.4 1 1]" --color data/four_color.mat
+    --cbar 1 --weights "[1.4 1 1]" --color data/four_color.mat --file_types jpg
 
 printf "${Color}Finished phantom 2D workflow!${Clear}\n"

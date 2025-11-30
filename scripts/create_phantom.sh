@@ -83,9 +83,9 @@ Usage:
     ${Program} -i spectral_file.txt -a acquisition_file.mat -o output_folder
 
 where
-  spectral_file.txt     
-  acquisition_file.txt
-  output_file           output folder
+  spectral_file.txt          file containing spectral specification
+  acquisition_file.txt       file containing acquisition values
+  output_file                output folder
 
 Example:
   ${Program} -i data/Phantom_spect.mat -a data/acq_phantom.txt -o Phantom1

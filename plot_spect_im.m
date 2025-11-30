@@ -20,6 +20,8 @@
 function plot_spect_im(varargin)
 progtime=tic;
 p = inputParser;
+p.CaseSensitive = true;     
+p.PartialMatching = false; 
 %required i/p
 addParameter(p, 'spect_imfile', '', @(x)ischar(x) || isstring(x));%required
 addParameter(p, 'imgfile', '', @(x)ischar(x) || isstring(x));

@@ -9,8 +9,8 @@ EXEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)" ;
 export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
-MATLABRelease=R2024b
-MATLABVersNum=24.2
+MATLABRelease=R2025b
+MATLABVersNum=25.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
@@ -86,7 +86,7 @@ read -d '' usage <<EOF
 ${CompiledMATLABProgram}
 
 Usage:
-    ${Program} -i spectral_file.mat -m maskfile.mat -o output_prefix -t figure_types)
+    ${Program} -i spectral_file.mat -m maskfile.mat -o output_prefix -t figure_types [optional arguments]
 
 where
   input_file.mat   input image .mat file, containing data, im_mask, and T1, T2, D
@@ -94,8 +94,16 @@ where
   maskfile.mat     mask file
   figure_types     output figure types (png, epsc, etc)
 
+Optional arguments (passed as name-value pairs to plot_avg_spectra):
+  -s, --ax_scale   axis scale (e.g. 'linear' or 'log')
+  -l, --ax_lims    axis limits, MATLAB-style string (e.g. "[10 200]" or "[10 200 0 1]")
+  -c, --color      line color (1D) or colormap name (2D)
+  -n, --nlevel     number of contour levels (2D only; positive integer)
+  -w, --linewidth  line width for line plots (positive number)
+  -b, --cbar       1 to show colorbar, 0 to hide
+
 Example:
-  ${Program} -i DRCSI_inj_mouse_data_nnls_spect.mat -m mask.mat -o Result -t png epsc
+  ${Program} -i DRCSI_inj_mouse_data_nnls_spect.mat -m mask.mat -o Result -t png epsc -s log -l "[10 200]" -c r -w 2 -b 1
 
 
 note: all arguments are required!
@@ -115,6 +123,14 @@ spectfile=""
 imgfile=""
 output_prefix=""
 output_types=""
+
+# NEW: variables for optional MATLAB name-value arguments
+ax_scale=""
+ax_lims=""
+cmap=""
+nlevel=""
+linewidth=""
+cbar=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -147,7 +163,32 @@ while [[ $# -gt 0 ]]; do
         arg=$1
         if (($#<1)); then break; fi
       done
-      ;;      
+      ;;
+    # NEW: optional arguments mapping to MATLAB name-value pairs
+    -s|--ax_scale)
+      ax_scale="$2"
+      shift; shift;
+      ;;
+    -l|--ax_lims)
+      ax_lims="$2"
+      shift; shift;
+      ;;
+    -c|--color)
+      cmap="$2"
+      shift; shift;
+      ;;
+    -n|--nlevel)
+      nlevel="$2"
+      shift; shift;
+      ;;
+    -w|--linewidth)
+      linewidth="$2"
+      shift; shift;
+      ;;
+    -b|--cbar)
+      cbar="$2"
+      shift; shift;
+      ;;
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -189,6 +230,37 @@ if [ "x$output_types" = "x" ]; then
   ArgsOK=0
 fi
 
+# NEW: light validation for numeric optional arguments.
+# String-valued options (ax_scale, ax_lims, color) are left for MATLAB to validate
+# so we don't duplicate detailed logic here.
+
+if [ -n "$nlevel" ]; then
+  if ! [[ "$nlevel" =~ ^[0-9]+$ ]]; then
+    errs="${errs}\nInvalid nlevel '$nlevel'. Must be a positive integer."
+    ArgsOK=0
+  fi
+fi
+
+if [ -n "$linewidth" ]; then
+  # simple numeric check (integer or float, >0)
+  if ! [[ "$linewidth" =~ ^([1-9][0-9]*|[0-9]*\.[0-9]+)$ ]]; then
+    errs="${errs}\nInvalid linewidth '$linewidth'. Must be a positive number."
+    ArgsOK=0
+  fi
+fi
+
+if [ -n "$cbar" ]; then
+  if ! [[ "$cbar" =~ ^[0-9]+$ ]]; then
+    errs="${errs}\nInvalid cbar '$cbar'. Must be 0 or 1."
+    ArgsOK=0
+  else
+    if (( cbar != 0 && cbar != 1 )); then
+      errs="${errs}\nInvalid cbar '$cbar'. Must be 0 or 1."
+      ArgsOK=0
+    fi
+  fi
+fi
+
 if (($ArgsOK==0)); then
   echo
   echo "$usage"
@@ -219,9 +291,32 @@ fi
 
 #example:
 #plotAvgSpectra('spect_imfile','Phantom1D/Phantom1D_data_ladmm_spect.mat', 'spatmaskfile', 'Phantom1D/Phantom_mask.mat', ...
-    # 'outprefix','Phantom1D/Phantom1D_data_ladmm_avg_spectra','linewidth',3,'ax_scale',{'log'},'color','g','cbar',1, ...
-    # 'ax_lim',"[10 200]", 'file_types', {'png','pdf'});
-echo Running "${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
-"${Executable}" spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types}
+#    'outprefix','Phantom1D/Phantom1D_data_ladmm_avg_spectra','linewidth',3,'ax_scale',{'log'},'color','g','cbar',1, ...
+#    'ax_lim',"[10 200]", 'file_types', {'png','pdf'});
+
+# NEW: build argument list as an array so that things like "[10 200]" stay a single argument
+ARGS=( spect_imfile "${spectfile}" spatmaskfile "${maskfile}" outprefix "${output_prefix}" file_types ${output_types} )
+
+if [ -n "$ax_scale" ]; then
+  ARGS+=( ax_scale "$ax_scale" )
+fi
+if [ -n "$ax_lims" ]; then
+  ARGS+=( ax_lims "$ax_lims" )
+fi
+if [ -n "$cmap" ]; then
+  ARGS+=( color "$cmap" )
+fi
+if [ -n "$nlevel" ]; then
+  ARGS+=( nlevel "$nlevel" )
+fi
+if [ -n "$linewidth" ]; then
+  ARGS+=( linewidth "$linewidth" )
+fi
+if [ -n "$cbar" ]; then
+  ARGS+=( cbar "$cbar" )
+fi
+
+echo Running "${Executable}" "${ARGS[@]}"
+"${Executable}" "${ARGS[@]}"
 
 exit

@@ -1,10 +1,11 @@
 #!/bin/bash
+
 EXEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)" ;
 export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
-MATLABRelease=R2024b
-MATLABVersNum=24.2
+MATLABRelease=R2025b
+MATLABVersNum=25.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
@@ -49,6 +50,7 @@ if [ -z "$BrainSuiteMCR" ]; then
     echo
     echo "(replace /path/to/your/MCR with the path to your MCR [or Matlab] installation)"
     echo
+    echo "NOTE: THE EXACT VERSION NUMBER IS IMPORTANT. NEWER VERSIONS WILL NOT WORK."
     exit 78
   fi
 fi
@@ -80,21 +82,18 @@ read -d '' usage <<EOF
 ${CompiledMATLABProgram}
 
 Usage:
-
-  ${Program} -i spectfile.mat -m spectmask_file.mat -c colorfile.mat -o output_prefix -t [png|eps|epsc|pdf]
+  ${Program} --funcfile expr_file.txt --outprefix output_prefix
 
 where
-  spectfile.mat      spectral image file produced by solver
-  spectmask_file.mat spectral mask file
-  colorfile.mat      color definition to be used for composite maps
-  output_prefix      prefix to be used for output composite figures
-  png|eps|epsc|pdf   specifies the output type for the figures (can be used multiple times)
+  expr_file.txt   text file containing MATLAB expressions that define:
+                  func, spect_params, acq_params, exp_vals, components
+                  (and optionally noise_std)
+  output_prefix   prefix for the CRLB result file (a .txt will be added)
 
 Example:
+  ${Program} --funcfile data/func_expression_diffT2_1.txt --outprefix Result/CRLB_values
 
-  ${Program} -i DRCSI_inj_mouse_data_nnls_spect.mat -m data/spectrum_mask_inj_mouse.mat -c three_color.mat -o DRCSI_inj_mouse_data_nnls_comp -t png
-
-note: all arguments are required!
+note: both arguments are required!
 
 EOF
 
@@ -103,112 +102,65 @@ if [ $# -lt 1 ]; then
   echo
   echo "$usage"
   echo
-  exit
+  exit 1
 fi
 
-# spectfile=""
-# spectmask_file=""
-# colorfile=""
-# output_prefix=""
-# output_types=""
+funcfile=""
+outprefix=""
 
-# while [[ $# -gt 0 ]]; do
-#   case $1 in
-#     -h|--help)
-#       echo
-#       echo "$usage"
-#       echo
-#       shift # past argument
-#       exit 0
-#       ;;
-#     -i)
-#       spectfile="$2"
-#       shift; shift;
-#       ;;
-#     -m)
-#       spectmask_file="$2"
-#       shift; shift;
-#       ;;
-#     -c)
-#       colorfile="$2"
-#       shift; shift;
-#       ;;
-#     -o)
-#       output_prefix="$2"
-#       shift; shift;
-#       ;;
-#     -o)
-#       output_prefix="$2"
-#       shift; shift;
-#       ;;
-#     -t)
-#       shift
-#       arg=$1
-#       while [[ ! ${arg:0:1} == "-" ]]; do
-#         output_types="$output_types $1"
-#         shift
-#         arg=$1
-#         if (($#<1)); then break; fi
-#       done
-#       ;;      
-#     -*|--*)
-#       echo "Unknown option $1"
-#       exit 1
-#       ;;
-#     *)
-#       echo "Unrecognized parameter $1"
-#       exit 1
-#       ;;
-#   esac
-# done
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      echo
+      echo "$usage"
+      echo
+      shift
+      exit 0
+      ;;
+    -f|--funcfile)
+      funcfile="$2"
+      shift; shift;
+      ;;
+    -o|--outprefix)
+      outprefix="$2"
+      shift; shift;
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      echo "Unrecognized parameter $1"
+      exit 1
+      ;;
+  esac
+done
 
-# ArgsOK=1
-# errs=""
+ArgsOK=1
+errs=""
 
-# if [ "x$spectfile" = "x" ]; then
-#   errs="${errs}\nNo input spectral file provided -- -i option is required!"
-#   ArgsOK=0
-# else
-#   if [ ! -f "$spectfile" ]; then
-#     errs="${errs}\nInput spectral file $spectfile does not exist!"
-#     ArgsOK=0
-#   fi
-# fi
-# if [ "x$spectmask_file" = "x" ]; then
-#   errs="${errs}\nNo spectral mask file provided -- -m option is required!"
-#   ArgsOK=0
-# else
-#   if [ ! -f "$spectmask_file" ]; then
-#     errs="${errs}\nSpectral mask file $spectmask_file does not exist!"
-#     ArgsOK=0
-#   fi
-# fi
-# if [ "x$colorfile" = "x" ]; then
-#   errs="${errs}\nNo color file provided -- -c option is required!"
-#   ArgsOK=0
-# else
-#   if [ ! -f "$colorfile" ]; then
-#     errs="${errs}\nColor file $colorfile does not exist!"
-#     ArgsOK=0
-#   fi
-# fi
-# if [ "x$output_prefix" = "x" ]; then
-#   errs="${errs}\nNo output prefix provided -- -o option is required!"
-#   ArgsOK=0
-# fi
-# if [ "x$output_types" = "x" ]; then
-#   errs="${errs}\nNo output image types provided -- -t option is required!"
-#   ArgsOK=0
-# fi
+if [ "x$funcfile" = "x" ]; then
+  errs="${errs}\nNo function expression file provided -- --funcfile option is required!"
+  ArgsOK=0
+else
+  if [ ! -f "$funcfile" ]; then
+    errs="${errs}\nFunction expression file $funcfile does not exist!"
+    ArgsOK=0
+  fi
+fi
 
-# if (($ArgsOK==0)); then
-#   echo
-#   echo "$usage"
-#   echo
-#   printf "Error:$errs\n\n"
-#   exit 1
-# fi
+if [ "x$outprefix" = "x" ]; then
+  errs="${errs}\nNo output prefix provided -- --outprefix option is required!"
+  ArgsOK=0
+fi
 
+if (($ArgsOK==0)); then
+  echo
+  echo "$usage"
+  echo
+  printf "Error:$errs\n\n"
+  exit 1
+fi
 
 # Set up path for MCR applications.
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -230,6 +182,7 @@ else
   export XAPPLRESDIR;
 fi
 
-"${Executable}" "$@"
+echo Running "${Executable}" funcfile "${funcfile}" outprefix "${outprefix}"
+"${Executable}" funcfile "${funcfile}" outprefix "${outprefix}"
 
 exit

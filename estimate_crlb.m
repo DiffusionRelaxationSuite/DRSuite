@@ -21,6 +21,8 @@ function estimate_crlb(varargin)
 
 programTimer=tic;
 p = inputParser;
+p.CaseSensitive = true;     
+p.PartialMatching = false; 
 %required i/p
 addParameter(p, 'funcfile', '', @(x)ischar(x) || isstring(x));
 addParameter(p, 'outprefix', '', @(x)ischar(x) || isstring(x));

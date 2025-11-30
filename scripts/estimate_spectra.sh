@@ -3,8 +3,8 @@ EXEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)" ;
 export EXEDIR;
 Program=$(basename ${BASH_SOURCE[0]})
 CompiledMATLABProgram=${Program%.sh}
-MATLABRelease=R2024b
-MATLABVersNum=24.2
+MATLABRelease=R2025b
+MATLABVersNum=25.2
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   Arch=maci64
@@ -80,20 +80,22 @@ read -d '' usage <<EOF
 ${CompiledMATLABProgram}
 
 Usage:
-  ${Program} -i input_file.mat -o output_file.mat -c config.ini -m mask_file.mat -d dict_file.mat
+  ${Program} -i input_file.mat -o output_file.mat -c config.ini -m mask_file.mat -d dict_file.mat [--cost_calc 0|1]
 
 where
   input_file.mat   input image .mat file, containing data, im_mask, and T1, T2, D
   output_file.mat  output spectral image file
+  mask_file.mat    spatial mask (optional in MATLAB but required here)
+  dict_file.mat    spectral information (.mat with dictionary / spectral_dim)
   config.ini       configuration file in .ini format
+  --cost_calc      (optional) 0 to skip cost plotting, 1 to enable (default = 1)
 
 Example:
-  spectEstimation.sh -i data/DRCSI_data_format_v1.mat -m data/DRCSI_whole_spatmask.mat -d data/DRCSI_dict.mat -c demos/DRCSI_ladmm.ini -o Result/DRCSI_inj_mouse_data_ladmm_spect.mat'
+  ${Program} -i data/DRCSI_data_format_v1.mat -m data/DRCSI_whole_spatmask.mat -d data/DRCSI_dict.mat -c demos/DRCSI_ladmm.ini -o Result/DRCSI_inj_mouse_data_ladmm_spect.mat
 
-note: all arguments are required!
+note: all arguments except --cost_calc are required!
 
 EOF
-#  ${Program} -i data/DRCSI_inj_mouse_data.mat -o DRCSI_inj_mouse_data_nnls_spect.mat -c demos/demo2_nnls.ini
 
 # Parse inputs
 if [ $# -lt 1 ]; then
@@ -108,6 +110,7 @@ input_file=""
 output_file=""
 mask_file=""
 dict_file=""
+cost_calc=""   ### CHANGED: new variable for optional cost_calc
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -138,6 +141,10 @@ while [[ $# -gt 0 ]]; do
       config_file="$2"
       shift; shift;
       ;;
+    --cost_calc)        ### CHANGED: new option
+      cost_calc="$2"
+      shift; shift;
+      ;;
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -165,7 +172,7 @@ if [ "x$mask_file" = "x" ]; then
   ArgsOK=0
 fi
 if [ "x$dict_file" = "x" ]; then
-  errs="${errs}\nNo output file provided -- -o option is required!"
+  errs="${errs}\nNo spectral information file provided -- -d option is required!"   ### CHANGED: fixed message
   ArgsOK=0
 fi
 if [ "x$config_file" = "x" ]; then
@@ -182,7 +189,6 @@ if [ ! -f "$input_file" ]; then
   errs="${errs}\nInput file $input_file does not exist!"
   ArgsOK=0
 fi
-
 
 if (($ArgsOK==0)); then
   echo
@@ -212,6 +218,15 @@ else
   export XAPPLRESDIR;
 fi
 
-"${Executable}" imgfile $input_file spatmaskfile $mask_file configfile $config_file spect_infofile $dict_file outprefix $output_file
+# Call the compiled MATLAB program.
+# We always pass cost_calc; if it's empty, MATLAB's "isempty(cost_calc)" branch
+# will treat it as "not provided" and default to 1.
+"${Executable}" \
+  imgfile "$input_file" \
+  spatmaskfile "$mask_file" \
+  configfile "$config_file" \
+  spect_infofile "$dict_file" \
+  outprefix "$output_file" \
+  cost_calc "$cost_calc"      ### CHANGED: new name–value pair
 
 exit

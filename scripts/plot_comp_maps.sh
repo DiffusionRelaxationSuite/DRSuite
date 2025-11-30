@@ -86,20 +86,25 @@ ${CompiledMATLABProgram}
 
 Usage:
 
-  ${Program} -i spectfile.mat -m spectmask_file.mat -c colorfile.mat -o output_prefix -t [png|eps|epsc|pdf]
+  ${Program} -i spectfile.mat -m spectmask_file.mat -c colorfile.mat -o output_prefix -t figure_type [options]
 
-where
-  spectfile.mat      spectral image file produced by solver
-  spectmask_file.mat spectral mask file
-  colorfile.mat      color definition to be used for composite maps
-  output_prefix      prefix to be used for output composite figures
-  png|eps|epsc|pdf   specifies the output type for the figures (can be used multiple times)
+Required arguments:
+  -i, --spect_imfile      spectral image file produced by solver
+  -m, --spectmaskfile     spectral mask file
+  -c, --color             color definition .mat file (must contain 'color')
+  -o, --outprefix         prefix to be used for output composite figures
+  -t, --file_types        output figure type (png|eps|epsc|pdf, etc.)
+
+Optional arguments (passed as name-value pairs to plot_comp_maps):
+  -w, --weights           component weights (e.g. "[1 0.5 0.3]" as MATLAB-style string)
+  -b, --cbar              1 to show colorbar, 0 to hide (default = 0)
 
 Example:
 
-  ${Program} -i DRCSI_inj_mouse_data_nnls_spect.mat -m data/spectrum_mask_inj_mouse.mat -c three_color.mat -o DRCSI_inj_mouse_data_nnls_comp -t png
+  ${Program} -i DRCSI_inj_mouse_data_nnls_spect.mat -m data/spectrum_mask_inj_mouse.mat -c three_color.mat \\
+             -o DRCSI_inj_mouse_data_nnls_comp -t png
 
-note: all arguments are required!
+note: all required arguments must be provided!
 
 EOF
 
@@ -116,6 +121,9 @@ spectmask_file=""
 colorfile=""
 output_prefix=""
 output_types=""
+
+weights=""   # NEW optional
+cbar=""      # NEW optional
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -146,13 +154,21 @@ while [[ $# -gt 0 ]]; do
       shift
       arg=$1
       while [[ ! ${arg:0:1} == "-" ]]; do
-        # output_types="$output_types $1"
+        # As in other wrappers: only the final type is used currently
         output_types="$1"
         shift
         arg=$1
         if (($#<1)); then break; fi
       done
-      ;;      
+      ;;
+    -w|--weights)          # NEW
+      weights="$2"
+      shift; shift;
+      ;;
+    -b|--cbar)             # NEW
+      cbar="$2"
+      shift; shift;
+      ;;
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -203,6 +219,19 @@ if [ "x$output_types" = "x" ]; then
   ArgsOK=0
 fi
 
+# (Optional) tiny validation for cbar (0/1)
+if [ -n "$cbar" ]; then
+  if ! [[ "$cbar" =~ ^[0-9]+$ ]]; then
+    errs="${errs}\nInvalid cbar '$cbar'. Must be 0 or 1."
+    ArgsOK=0
+  else
+    if (( cbar != 0 && cbar != 1 )); then
+      errs="${errs}\nInvalid cbar '$cbar'. Must be 0 or 1."
+      ArgsOK=0
+    fi
+  fi
+fi
+
 if (($ArgsOK==0)); then
   echo
   echo "$usage"
@@ -210,7 +239,6 @@ if (($ArgsOK==0)); then
   printf "Error:$errs\n\n"
   exit 1
 fi
-
 
 # Set up path for MCR applications.
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -232,6 +260,17 @@ else
   export XAPPLRESDIR;
 fi
 
-"${Executable}" spect_imfile "${spectfile}" spectmaskfile "${spectmask_file}" color "${colorfile}" outprefix "${output_prefix}" file_types ${output_types}
+# Build argument list so we can conditionally append optional params
+ARGS=( spect_imfile "${spectfile}" spectmaskfile "${spectmask_file}" color "${colorfile}" outprefix "${output_prefix}" file_types ${output_types} )
+
+if [ -n "$weights" ]; then
+  ARGS+=( weights "$weights" )
+fi
+if [ -n "$cbar" ]; then
+  ARGS+=( cbar "$cbar" )
+fi
+
+echo Running "${Executable}" "${ARGS[@]}"
+"${Executable}" "${ARGS[@]}"
 
 exit

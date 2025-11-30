@@ -39,19 +39,19 @@ plot_avg_spectra.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
     --spatmaskfile Phantom1D/Phantom_mask.mat \
     --outprefix Phantom1D/Phantom1D_data_ladmm_avg_spectra --linewidth 3 \
     --ax_scale log --color g --cbar 1 --ax_lims "[10 200]" \
-    --file_types "png pdf"
+    --file_types png
 
 printf "${Color}Plotting spectroscopic image...${Clear}\n"
 plot_spect_im.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
     --imgfile Phantom1D/Phantom_data.mat --spatmaskfile Phantom1D/Phantom_mask.mat \
     --outprefix Phantom1D/Phantom1D_data_spectroscopic_Im --threshold .2 \
     --linewidth 1 --enc_idx 8 --ax_scale log --color g \
-    --ax_lims "[10 200]" --file_types "png jpg"
+    --ax_lims "[10 200]" --file_types jpg
 
 printf "${Color}Plotting component maps...${Clear}\n"
 plot_comp_maps.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
     --spectmaskfile data/Phantom1D_spectrm_mask.mat \
     --color data/four_color.mat --outprefix Phantom1D/Phantom1D_component_maps \
-    --cbar 0 --weights "[1 3]"
+    --cbar 0 --weights "[1 3]" --file_types png
 
 printf "${Color}Finished phantom 1D workflow!${Clear}\n"

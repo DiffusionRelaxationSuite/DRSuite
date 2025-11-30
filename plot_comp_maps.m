@@ -21,6 +21,8 @@ function plot_comp_maps(varargin)
 
 progtime=tic;
 p = inputParser;
+p.CaseSensitive = true;     
+p.PartialMatching = false; 
 %required i/p
 addParameter(p, 'spect_imfile', '', @(x)ischar(x) || isstring(x));%required
 addParameter(p, 'outprefix', '', @(x)ischar(x) || isstring(x));
