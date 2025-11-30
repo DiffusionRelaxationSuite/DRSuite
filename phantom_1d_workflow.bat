@@ -27,12 +27,12 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Plotting average spectra...
 REM Plot Average spectra
-"plot_avg_spectra.exe" spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat spatmaskfile Phantom1D/Phantom_mask.mat outprefix Phantom1D/Phantom1D_data_ladmm_avg_spectra linewidth 3 ax_scale log color g cbar 1 ax_lim "[10 200]" file_types png
+"plot_avg_spectra.exe" spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat spatmaskfile Phantom1D/Phantom_mask.mat outprefix Phantom1D/Phantom1D_data_ladmm_avg_spectra linewidth 3 ax_scale log color g cbar 1 ax_lims "[10 200]" file_types png
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Plotting spectroscopic image...
 REM Plot spectroscopic image
-"plot_spect_im.exe" spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat imgfile Phantom1D/Phantom_data.mat spatmaskfile Phantom1D/Phantom_mask.mat outprefix Phantom1D/Phantom1D_data_spectroscopic_Im threshold .2 linewidth 1 enc_idx 8 ax_scale log color g ax_lim "[10 200]" file_types png
+"plot_spect_im.exe" spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat imgfile Phantom1D/Phantom_data.mat spatmaskfile Phantom1D/Phantom_mask.mat outprefix Phantom1D/Phantom1D_data_spectroscopic_Im threshold .2 linewidth 1 enc_idx 8 ax_scale log color g ax_lims "[10 200]" file_types png
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Plotting component maps...

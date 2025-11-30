@@ -45,7 +45,7 @@ plot_avg_spectra.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat \
     --spatmaskfile Phantom2D/Phantom_mask.mat \
     --outprefix Phantom2D/Phantom2D_data_ladmm_avg_spectra \
     --cbar 0 --color jet --linewidth 3 --ax_scale log \
-    --ax_lim "[ 0.05 2 10 200]" --nlevel 15 --file_types "png pdf"
+    --ax_lims "[ 0.05 2 10 200]" --nlevel 15 --file_types "png pdf"
 
 printf "${Color}Plotting spectroscopic image...${Clear}\n"
 plot_spect_im.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat \
