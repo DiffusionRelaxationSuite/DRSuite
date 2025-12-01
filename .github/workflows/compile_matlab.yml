@@ -25,8 +25,8 @@ jobs:
         MATLAB_VERSION: [ R2025b ]
         # MATLAB_VERSION: [ R2023b , R2024a, R2024b, R2025a, R2025b ]
         # os: [ windows-latest, ubuntu-22.04, macos-15, macos-15-intel ]
-        # os: [ windows-latest, ubuntu-22.04, macos-15 ]
-        os: [ linux ]
+        os: [ windows-latest, ubuntu-22.04, macos-15 ]
+        # os: [ linux ]
           
     runs-on:
       labels: [ self-hosted, "${{ matrix.os }}" ]
