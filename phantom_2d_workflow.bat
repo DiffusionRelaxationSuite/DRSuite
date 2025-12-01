@@ -10,19 +10,19 @@ echo Creating phantom...
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Running beta sweep...
-"%RootDir%bin\plot_beta_sweep.exe" imgfile Phantom2D/Phantom_data.mat betafile data/betafile_phantom2d.txt spect_infofile Phantom2D/Phantom_spectrm_info.mat outprefix Phantom2D/Phantom_data_ladmm_spect configfile demos/Phantom2D_ladmm.ini spatmaskfile Phantom2D/Phantom_mask_beta_calc.mat file_types png
+"%RootDir%bin\plot_beta_sweep.exe" imgfile Phantom2D/Phantom_data.mat betafile data/betafile_phantom2d.txt spect_infofile Phantom2D/Phantom_spectrum_info.mat outprefix Phantom2D/Phantom_data_ladmm_spect configfile demos/Phantom2D_ladmm.ini spatmaskfile Phantom2D/Phantom_mask_beta_calc.mat file_types png
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Estimating spectra (ladmm)
-"%RootDir%bin\estimate_spectra.exe" imgfile Phantom2D/Phantom_data.mat spect_infofile Phantom2D/Phantom_spectrm_info.mat outprefix Phantom2D/Phantom2D_data_ladmm_spect configfile demos/Phantom2D_ladmm.ini spatmaskfile Phantom2D/Phantom_mask.mat
+"%RootDir%bin\estimate_spectra.exe" imgfile Phantom2D/Phantom_data.mat spect_infofile Phantom2D/Phantom_spectrum_info.mat outprefix Phantom2D/Phantom2D_data_ladmm_spect configfile demos/Phantom2D_ladmm.ini spatmaskfile Phantom2D/Phantom_mask.mat
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Estimating spectra (admm)
-"%RootDir%bin\estimate_spectra.exe" imgfile Phantom2D/Phantom_data.mat spect_infofile Phantom2D/Phantom_spectrm_info.mat outprefix Phantom2D/Phantom2D_data_admm_spect.mat configfile demos/Phantom2D_admm.ini spatmaskfile Phantom2D/Phantom_mask.mat cost_calc 1
+"%RootDir%bin\estimate_spectra.exe" imgfile Phantom2D/Phantom_data.mat spect_infofile Phantom2D/Phantom_spectrum_info.mat outprefix Phantom2D/Phantom2D_data_admm_spect.mat configfile demos/Phantom2D_admm.ini spatmaskfile Phantom2D/Phantom_mask.mat cost_calc 1
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Estimating spectra (nnls)
-"%RootDir%bin\estimate_spectra.exe" imgfile Phantom2D/Phantom_data.mat spect_infofile Phantom2D/Phantom_spectrm_info.mat outprefix Phantom2D/Phantom2D_data_nnls_spect.mat configfile demos/Phantom2D_nnls.ini spatmaskfile Phantom2D/Phantom_mask.mat
+"%RootDir%bin\estimate_spectra.exe" imgfile Phantom2D/Phantom_data.mat spect_infofile Phantom2D/Phantom_spectrum_info.mat outprefix Phantom2D/Phantom2D_data_nnls_spect.mat configfile demos/Phantom2D_nnls.ini spatmaskfile Phantom2D/Phantom_mask.mat
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Plotting average spectra...
@@ -34,7 +34,7 @@ echo Plotting spectroscopic image...
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Plotting component maps...
-"%RootDir%bin\plot_comp_maps.exe" spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat outprefix Phantom2D/Phantom2D_data_component_maps spectmaskfile data/Phantom2D_spectrm_mask.mat cbar 1 weights "[1.4 1 1]" color data/four_color.mat
+"%RootDir%bin\plot_comp_maps.exe" spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat outprefix Phantom2D/Phantom2D_data_component_maps spectmaskfile data/Phantom2D_spectrum_mask.mat cbar 1 weights "[1.4 1 1]" color data/four_color.mat
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo Done!

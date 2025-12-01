@@ -12,25 +12,25 @@ create_phantom.sh --acqfile data/acq_phantom1D.txt --spectfile data/Phantom1D_sp
 
 printf "${Color}Running beta sweep...${Clear}\n"
 plot_beta_sweep.sh --imgfile Phantom1D/Phantom_data.mat --betafile data/betafile_phantom1d.txt \
-    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom1D/Phantom_spectrum_info.mat \
     --outprefix Phantom1D/Phantom_data_ladmm_spect --configfile demos/Phantom1D_ladmm.ini \
     --spatmaskfile Phantom1D/Phantom_mask_beta_calc.mat --file_types png
 
 printf "${Color}Estimating spectra (ladmm)...${Clear}\n"
 estimate_spectra.sh --imgfile Phantom1D/Phantom_data.mat \
-    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom1D/Phantom_spectrum_info.mat \
     --outprefix Phantom1D/Phantom1D_data_ladmm_spect.mat \
     --configfile demos/Phantom1D_ladmm.ini --spatmaskfile Phantom1D/Phantom_mask.mat
 
 printf "${Color}Estimating spectra (admm)...${Clear}\n"
 estimate_spectra.sh --imgfile Phantom1D/Phantom_data.mat \
-    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom1D/Phantom_spectrum_info.mat \
     --outprefix Phantom1D/Phantom1D_data_admm_spect.mat \
     --configfile demos/Phantom1D_admm.ini --spatmaskfile Phantom1D/Phantom_mask.mat
 
 printf "${Color}Estimating spectra (nnls)...${Clear}\n"
 estimate_spectra.sh --imgfile Phantom1D/Phantom_data.mat \
-    --spect_infofile Phantom1D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom1D/Phantom_spectrum_info.mat \
     --outprefix Phantom1D/Phantom1D_data_nnls_spect.mat \
     --configfile demos/Phantom1D_nnls.ini --spatmaskfile Phantom1D/Phantom_mask.mat
 
@@ -50,7 +50,7 @@ plot_spect_im.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
 
 printf "${Color}Plotting component maps...${Clear}\n"
 plot_comp_maps.sh --spect_imfile Phantom1D/Phantom1D_data_ladmm_spect.mat \
-    --spectmaskfile data/Phantom1D_spectrm_mask.mat \
+    --spectmaskfile data/Phantom1D_spectrum_mask.mat \
     --color data/four_color.mat --outprefix Phantom1D/Phantom1D_component_maps \
     --cbar 0 --weights "[1 3]" --file_types png
 

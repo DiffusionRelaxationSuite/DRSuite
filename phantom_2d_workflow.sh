@@ -14,28 +14,28 @@ create_phantom.sh --acqfile data/acq_phantom.txt \
 printf "${Color}Running beta sweep...${Clear}\n"
 plot_beta_sweep.sh --imgfile Phantom2D/Phantom_data.mat \
     --betafile data/betafile_phantom2d.txt \
-    --spect_infofile Phantom2D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom2D/Phantom_spectrum_info.mat \
     --outprefix Phantom2D/Phantom_data_ladmm_spect \
     --configfile demos/Phantom2D_ladmm.ini --spatmaskfile \
     Phantom2D/Phantom_mask_beta_calc.mat --file_types png
 
 printf "${Color}Estimating spectra (ladmm)...${Clear}\n"
 estimate_spectra.sh --imgfile Phantom2D/Phantom_data.mat \
-    --spect_infofile Phantom2D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom2D/Phantom_spectrum_info.mat \
     --outprefix Phantom2D/Phantom2D_data_ladmm_spect \
     --configfile demos/Phantom2D_ladmm.ini \
     --spatmaskfile Phantom2D/Phantom_mask.mat
 
 printf "${Color}Estimating spectra (admm)...${Clear}\n"
 estimate_spectra.sh --imgfile Phantom2D/Phantom_data.mat \
-    --spect_infofile Phantom2D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom2D/Phantom_spectrum_info.mat \
     --outprefix Phantom2D/Phantom2D_data_admm_spect.mat \
     --configfile demos/Phantom2D_admm.ini \
     --spatmaskfile Phantom2D/Phantom_mask.mat --cost_calc 1
 
 printf "${Color}Estimating spectra (nnls)...${Clear}\n"
 estimate_spectra.sh --imgfile Phantom2D/Phantom_data.mat \
-    --spect_infofile Phantom2D/Phantom_spectrm_info.mat \
+    --spect_infofile Phantom2D/Phantom_spectrum_info.mat \
     --outprefix Phantom2D/Phantom2D_data_nnls_spect.mat \
     --configfile demos/Phantom2D_nnls.ini \
     --spatmaskfile Phantom2D/Phantom_mask.mat
@@ -59,7 +59,7 @@ plot_spect_im.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat \
 printf "${Color}Plotting component maps...${Clear}\n"
 plot_comp_maps.sh --spect_imfile Phantom2D/Phantom2D_data_ladmm_spect.mat --outprefix \
     Phantom2D/Phantom2D_data_component_maps --spectmaskfile \
-    data/Phantom2D_spectrm_mask.mat \
+    data/Phantom2D_spectrum_mask.mat \
     --cbar 1 --weights "[1.4 1 1]" --color data/four_color.mat --file_types jpg
 
 printf "${Color}Finished phantom 2D workflow!${Clear}\n"

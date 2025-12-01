@@ -255,7 +255,7 @@ im_mask2(8:10,6:8,[2 5])=1;
 im_mask2(7:9,6:8,3:4)=1;
 % spectral_dim=[size(K,2) size(K,3)];
 save(fullfile(outputfolder_name,'Phantom_data.mat'),"data","resolution","spatial_dim","transform",'-v7.3')
-save(fullfile(outputfolder_name,'Phantom_spectrm_info.mat'),"K","axes","spectral_dim",'-v7.3')
+save(fullfile(outputfolder_name,'Phantom_spectrum_info.mat'),"K","axes","spectral_dim",'-v7.3')
 save(fullfile(outputfolder_name,'Phantom_mask.mat'),'im_mask','-v7.3')
 im_mask=im_mask2;
 save(fullfile(outputfolder_name,'Phantom_mask_beta_calc.mat'),'im_mask','-v7.3')
