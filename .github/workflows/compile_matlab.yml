@@ -79,10 +79,13 @@ jobs:
           products: >
             MATLAB_Compiler
             Image_Processing_Toolbox
-            
-# Medical_Imaging_Toolbox
-# Parallel_Computing_Toolbox
-            
+            Symbolic_Math_Toolbox
+
+      - name: Test CRLB code
+        uses: matlab-actions/run-command@v2
+        with:
+          command: addpath("data","solvers","utilities","ini2struct"), mkdir("Result"), estimate_crlb('funcfile','data/func_expression_diffT2_1.txt','outprefix','Result/CRLB_values')
+
       - name: Compile and package command-line tools
         uses: matlab-actions/run-command@v2
         with:
