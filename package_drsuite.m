@@ -60,8 +60,7 @@ function package_drsuite(versno)
 
     srcfiles=[ "plot_avg_spectra", "plot_comp_maps",...
         "plot_spect_im", "plot_beta_sweep", ...
-        "estimate_crlb","estimate_spectra", ...
-          "create_phantom" ];
+        "estimate_spectra", "create_phantom" ];
     for i=1:length(srcfiles)
         mfile=sprintf("%s.m",srcfiles(i));
         efile=sprintf("%s%s",srcfiles(i),exec_extension);
